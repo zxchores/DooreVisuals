@@ -1,0 +1,41 @@
+DooreVisuals
+
+Полноценный визуальный Fabric-клиент для Minecraft 1.21.11.
+
+DooreVisuals не автоматизирует бой и не изменяет hitbox.
+
+Возможности
+
+
+
+
+
+glassmorphism ClickGUI по клавише Right Shift
+
+
+
+размытие, glow, анимации и шрифт Inter
+
+
+
+HUD editor с перемещением и масштабированием элементов
+
+
+
+watermark, FPS/ping/frametime, координаты, броня, эффекты, keystrokes/CPS
+
+
+
+Target HUD, hit marker, частицы и индикаторы урона
+
+
+
+Zoom, Fullbright, Free Look и Item Physics
+
+
+
+категории модулей, поиск, типизированные настройки и JSON-профили
+
+
+
+три уровня качества визуальных эффектов с безопасным fallback
