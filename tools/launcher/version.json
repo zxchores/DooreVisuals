@@ -1,8 +1,8 @@
 {
-  "mod_version": "3.3.7",
-  "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.3.7/doorevisuals-3.3.7.jar",
+  "mod_version": "3.3.8",
+  "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.3.8/doorevisuals-3.3.8.jar",
   "launcher_version": "3.1.2",
-  "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.3.7/DooreVisuals.exe",
+  "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.3.8/DooreVisuals.exe",
   "required_files": [
     {
       "name": "fabric-api-0.141.5+1.21.11.jar",
