@@ -1,0 +1,15 @@
+---
+description: Always publish a GitHub Release after a DooreVisuals version bump
+alwaysApply: true
+---
+
+# Always release
+
+After a playable client build (version bump in Desktop `DooreClient.VERSION` / `gradle.properties`), publish without waiting to be asked:
+
+1. Update `version.json` and `tools/launcher/version.json` in this repo (manifest only — do not dump Desktop source).
+2. Commit with `-c user.name=zxchores -c user.email=zxchores@gmail.com` and message `release: bump update manifest to X.Y.Z`.
+3. Push `main`, then `gh release create vX.Y.Z` attaching `doorevisuals-X.Y.Z.jar` **and** `version.json`.
+4. Return the release URL.
+
+Do not force-push. Do not skip hooks.
