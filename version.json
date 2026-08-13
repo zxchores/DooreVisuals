@@ -1,1 +1,16 @@
-{"mod_version":"3.8.2","mod_download_url":"https://github.com/zxchores/DooreVisuals/releases/download/v3.8.2/doorevisuals-3.8.2.jar","launcher_version":"3.6.4","launcher_download_url":"https://github.com/zxchores/DooreVisuals/releases/download/v3.6.3/DooreVisuals.exe","required_files":[{"name":"fabric-api-0.141.5+1.21.11.jar","url":"https://cdn.modrinth.com/data/P7dR8mSH/versions/zGF3drOQ/fabric-api-0.141.5%2B1.21.11.jar"},{"name":"fabric-language-kotlin-1.13.9+kotlin.2.3.10.jar","url":"https://cdn.modrinth.com/data/Ha28R6CL/versions/ViT4gucI/fabric-language-kotlin-1.13.9%2Bkotlin.2.3.10.jar"}]}
+{
+  "mod_version": "3.10.0",
+  "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.10.0/doorevisuals-3.10.0.jar",
+  "launcher_version": "3.6.4",
+  "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.6.3/DooreVisuals.exe",
+  "required_files": [
+    {
+      "name": "fabric-api-0.141.5+1.21.11.jar",
+      "url": "https://cdn.modrinth.com/data/P7dR8mSH/versions/zGF3drOQ/fabric-api-0.141.5%2B1.21.11.jar"
+    },
+    {
+      "name": "fabric-language-kotlin-1.13.9+kotlin.2.3.10.jar",
+      "url": "https://cdn.modrinth.com/data/Ha28R6CL/versions/ViT4gucI/fabric-language-kotlin-1.13.9%2Bkotlin.2.3.10.jar"
+    }
+  ]
+}
