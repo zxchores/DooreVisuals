@@ -1,5 +1,8 @@
 {
   "users": [
-    { "uid": "692344", "role": "developer" }
+    {
+      "uid": "000001",
+      "role": "developer"
+    }
   ]
 }
