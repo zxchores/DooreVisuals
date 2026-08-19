@@ -1,8 +1,12 @@
 {
+  "roles": [
+    { "id": "developer", "label": "developer" },
+    { "id": "vip", "label": "VIP" },
+    { "id": "media", "label": "Media" },
+    { "id": "user", "label": "player" }
+  ],
   "users": [
-    {
-      "uid": "000001",
-      "role": "developer"
-    }
+    { "uid": "000001", "role": "developer" },
+    { "uid": "000002", "role": "vip" }
   ]
 }
