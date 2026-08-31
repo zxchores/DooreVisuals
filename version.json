@@ -1,8 +1,10 @@
 {
   "mod_version": "3.30.0",
   "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.30.0/doorevisuals-3.30.0.jar",
-  "launcher_version": "3.9.3",
-  "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.29.6/DooreVisuals.exe",
+  "mod_sha256": "df1aca84ff5751358a73e59aa98c715e83ff074100b6c648145e8d73a3368d73",
+  "launcher_version": "3.10.0",
+  "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.30.0/DooreVisuals.exe",
+  "launcher_sha256": "894963b7d7166d510a0c7ab7d3ab010a616652fad23e926091a4107db93d6018",
   "icon_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.14.0/avatar.png",
   "required_files": [
     {
