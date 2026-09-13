@@ -68,7 +68,7 @@ public final class MenuAtmosphere {
                 Paint.box(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(593939, 170), 12.0F);
                 Paint.outline(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(Theme.ACCENT, 40), 12.0F);
                 Paint.text(g, title, 28.0F, 22.0F, Theme.TEXT, 13.0F);
-                Paint.text(g, "DOORE  \u00b7  v3.30.2", 28.0F, 40.0F, Theme.alpha(Theme.ACCENT_HOT, 200), 8.0F);
+                Paint.text(g, "DOORE  \u00b7  v3.31.0", 28.0F, 40.0F, Theme.alpha(Theme.ACCENT_HOT, 200), 8.0F);
                 Paint.box(g, 18.0F, h - 28.0F, Math.min(180.0F, w * 0.28F), 1.5F, Theme.alpha(Theme.ACCENT, 150), 1.0F);
                 Paint.text(g, "visual client", 18.0F, h - 20.0F, Theme.MUTED, 7.5F);
             });

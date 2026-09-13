@@ -107,8 +107,8 @@ public final class App {
 
     private synchronized void start() {
         if (!this.live) {
-            LOG.info("Bootstrapping DooreVisuals {}", "3.30.2");
-            BootDebugLog.write("H1", "App.java:start", "mod bootstrap reached", "{\"version\":\"3.30.2\"}");
+            LOG.info("Bootstrapping DooreVisuals {}", "3.31.0");
+            BootDebugLog.write("H1", "App.java:start", "mod bootstrap reached", "{\"version\":\"3.31.0\"}");
             ModSounds.boot();
             this.aim = new Aim();
             this.aim.bind();
