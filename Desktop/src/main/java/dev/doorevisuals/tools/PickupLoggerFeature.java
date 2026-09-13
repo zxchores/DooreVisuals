@@ -40,9 +40,10 @@ public final class PickupLoggerFeature extends Feature implements Tick {
 
                             String s1 = "+" + i + "  " + s;
                             App.features().find(HudFeature.class).ifPresent(h -> {
-                                h.notify("Подбор", s1, HudFeature.NoteKind.OK);
                                 if ((Boolean)this.island.get()) {
                                     h.islandEvent("Подбор", s1);
+                                } else {
+                                    h.notify("Подбор", s1, HudFeature.NoteKind.OK);
                                 }
                             });
                         }

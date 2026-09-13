@@ -116,7 +116,8 @@ public final class EventsFeature extends Feature implements Tick {
         if (s != null) {
             return s;
         } else {
-            return this.fromBoard(mc) != null ? this.fromBoard(mc) : (this.line.isBlank() ? null : this.line);
+            String s1 = this.fromBoard(mc);
+            return s1 != null ? s1 : (this.line.isBlank() ? null : this.line);
         }
     }
 
