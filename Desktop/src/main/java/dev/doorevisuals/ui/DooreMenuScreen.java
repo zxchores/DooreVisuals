@@ -46,30 +46,33 @@ public final class DooreMenuScreen extends Screen {
     }
 
     private void buildButtons() {
-        int i = Math.min(280, Math.max(220, this.width * 32 / 100));
+        int i = Math.min(240, Math.max(180, this.width - 48));
         int j = (this.width - i) / 2;
-        int k = Math.round(this.height * 0.46F);
-        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, k, i, 28, Text.literal("Одиночная игра"), true, () -> this.client.setScreen(new SelectWorldScreen(this))));
-        this.addDrawableChild(
-            new DooreMenuScreen.MenuButton(j, k + 34, i, 28, Text.literal("Мультиплеер"), false, () -> this.client.setScreen(new MultiplayerScreen(this)))
-        );
+        int k = this.height < 280 ? 20 : 24;
+        int l = 4;
         DooreMenuScreen.LastServer dooremenuscreen$lastserver = this.resolveLastServer();
-        int l = k + 68;
+        int i1 = 4 + (dooremenuscreen$lastserver != null ? 1 : 0);
+        int j1 = this.height - 16 - i1 * (k + l);
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, j1, i, k, Text.literal("Одиночная игра"), true, () -> this.client.setScreen(new SelectWorldScreen(this))));
+        j1 += k + l;
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, j1, i, k, Text.literal("Мультиплеер"), false, () -> this.client.setScreen(new MultiplayerScreen(this))));
+        j1 += k + l;
         if (dooremenuscreen$lastserver != null) {
             this.addDrawableChild(
-                new DooreMenuScreen.MenuButton(j, l, i, 28, Text.literal(dooremenuscreen$lastserver.label), false, () -> this.connectLast(dooremenuscreen$lastserver))
+                new DooreMenuScreen.MenuButton(j, j1, i, k, Text.literal(dooremenuscreen$lastserver.label), false, () -> this.connectLast(dooremenuscreen$lastserver))
             );
-            l += 34;
+            j1 += k + l;
         }
 
-        int i1 = (i - 8) / 2;
-        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, l, i1, 26, Text.literal("Аккаунты"), false, () -> this.client.setScreen(new AltManagerScreen(this))));
+        int k1 = (i - 6) / 2;
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, j1, k1, k, Text.literal("Аккаунты"), false, () -> this.client.setScreen(new AltManagerScreen(this))));
         this.addDrawableChild(
             new DooreMenuScreen.MenuButton(
-                j + i1 + 8, l, i1, 26, Text.literal("Настройки"), false, () -> this.client.setScreen(new OptionsScreen(this, this.client.options))
+                j + k1 + 6, j1, k1, k, Text.literal("Настройки"), false, () -> this.client.setScreen(new OptionsScreen(this, this.client.options))
             )
         );
-        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, l + 32, i, 26, Text.literal("Выход"), false, () -> this.client.scheduleStop()));
+        j1 += k + l;
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, j1, i, k, Text.literal("Выход"), false, () -> this.client.scheduleStop()));
     }
 
     @Override
@@ -86,8 +89,12 @@ public final class DooreMenuScreen extends Screen {
 
     private void paintBrand(DrawContext g) {
         float f = this.width * 0.5F;
-        float f1 = Math.max(56.0F, this.height * 0.16F);
-        int i = Math.round(Math.min(84.0F, Math.max(56.0F, this.height * 0.1F)));
+        float f1 = Math.max(28.0F, Math.min(this.height * 0.18F, this.height * 0.28F));
+        int i = Math.round(Math.min(64.0F, Math.max(28.0F, this.height * 0.08F)));
+        if (this.height < 260) {
+            i = 24;
+            f1 = 22.0F;
+        }
 
         try {
             g.drawTexture(RenderPipelines.GUI_TEXTURED, Sprites.CLIENT_ICON, Math.round(f) - i / 2, Math.round(f1) - i / 2, 0.0F, 0.0F, i, i, i, i);
@@ -103,7 +110,7 @@ public final class DooreMenuScreen extends Screen {
         String s = Account.nick();
         String s1 = (s == null || s.isBlank() ? "visual client" : s) + "  ·  v" + DooreClient.VERSION;
         g.drawTextWithShadow(this.textRenderer, s1, Math.round(f) - this.textRenderer.getWidth(s1) / 2, Math.round(f1 + i * 0.55F + 20.0F), Theme.MUTED);
-        if (!this.news.isEmpty() && ChangelogSeen.hasNew()) {
+        if (this.height >= 280 && !this.news.isEmpty() && ChangelogSeen.hasNew()) {
             Changelog.Entry changelog$entry = this.news.getFirst();
             String s2 = "NEW  ·  v" + changelog$entry.version() + "  ·  " + changelog$entry.title();
             int j = Math.min(340, Math.max(160, this.textRenderer.getWidth(s2) + 20));
