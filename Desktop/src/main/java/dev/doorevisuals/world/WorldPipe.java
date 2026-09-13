@@ -5,6 +5,9 @@ import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.cosmetics.CosmeticsFeature;
 import dev.doorevisuals.draw.VisualQuality;
 import dev.doorevisuals.friends.FriendsFeature;
+import dev.doorevisuals.models.ModelsFeature;
+import dev.doorevisuals.server.FunHelperFeature;
+import dev.doorevisuals.tools.BoreHelperFeature;
 import dev.doorevisuals.tools.GpsFeature;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldExtractionContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
@@ -55,6 +58,9 @@ public final class WorldPipe {
                 App.features().find(MotionTrailFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
                 App.features().find(AtmosphereFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
                 App.features().find(CosmeticsFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
+                App.features().find(FunHelperFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
+                App.features().find(BoreHelperFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
+                App.features().find(ModelsFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
             }));
         }
     }

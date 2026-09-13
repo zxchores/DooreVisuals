@@ -1361,6 +1361,68 @@ public final class Mesh {
         }
     }
 
+    public static void modelCube(
+        WorldRenderContext ctx,
+        Identifier tex,
+        double x,
+        double y,
+        double z,
+        float yawDeg,
+        float scale,
+        float cx,
+        float cy,
+        float cz,
+        float w,
+        float h,
+        float d,
+        float u,
+        float v,
+        float texW,
+        float texH,
+        int argb
+    ) {
+        Mesh.Frame mesh$frame = Mesh.Frame.of(ctx);
+        if (mesh$frame != null && tex != null && !(w <= 0.0F) && !(h <= 0.0F) && !(d <= 0.0F)) {
+            float f = 0.0625F * Math.max(0.05F, scale);
+            float f1 = (float)Math.toRadians(yawDeg);
+            float f2 = (float)Math.cos(f1);
+            float f3 = (float)Math.sin(f1);
+            float tw = texW <= 1.0F ? 64.0F : texW;
+            float th = texH <= 1.0F ? 64.0F : texH;
+            VertexConsumer vertexconsumer = mesh$frame.buf(RenderLayers.entityTranslucentEmissive(tex));
+            float fx = w * 0.5F * f;
+            float fy = h * 0.5F * f;
+            float fz = d * 0.5F * f;
+            float lx = cx * f;
+            float lz = cz * f;
+            float y0 = (float)y + (cy - h * 0.5F) * f;
+            float y1 = (float)y + (cy + h * 0.5F) * f;
+            float[][] xz = new float[][]{{-fx + lx, -fz + lz}, {fx + lx, -fz + lz}, {fx + lx, fz + lz}, {-fx + lx, fz + lz}};
+            float[] xs = new float[4];
+            float[] zs = new float[4];
+
+            for (int i = 0; i < 4; i++) {
+                xs[i] = mesh$frame.x(x + xz[i][0] * f2 - xz[i][1] * f3);
+                zs[i] = mesh$frame.z(z + xz[i][0] * f3 + xz[i][1] * f2);
+            }
+
+            float by = mesh$frame.y(y0);
+            float ty = mesh$frame.y(y1);
+            float nu = u / tw;
+            float nv = v / th;
+            float nw = w / tw;
+            float nh = h / th;
+            float nd = d / tw;
+            float ndv = d / th;
+            texFace(vertexconsumer, mesh$frame.pose, xs[0], by, zs[0], xs[1], by, zs[1], xs[1], ty, zs[1], xs[0], ty, zs[0], nu + nd, nv + ndv + nh, nu + nd + nw, nv + ndv, argb);
+            texFace(vertexconsumer, mesh$frame.pose, xs[2], by, zs[2], xs[3], by, zs[3], xs[3], ty, zs[3], xs[2], ty, zs[2], nu + nd + nw + nd, nv + ndv + nh, nu + nd + nw + nd + nw, nv + ndv, argb);
+            texFace(vertexconsumer, mesh$frame.pose, xs[1], by, zs[1], xs[2], by, zs[2], xs[2], ty, zs[2], xs[1], ty, zs[1], nu + nd + nw, nv + ndv + nh, nu + nd + nw + nd, nv + ndv, argb);
+            texFace(vertexconsumer, mesh$frame.pose, xs[3], by, zs[3], xs[0], by, zs[0], xs[0], ty, zs[0], xs[3], ty, zs[3], nu, nv + ndv + nh, nu + nd, nv + ndv, argb);
+            texFace(vertexconsumer, mesh$frame.pose, xs[3], ty, zs[3], xs[2], ty, zs[2], xs[1], ty, zs[1], xs[0], ty, zs[0], nu + nd, nv, nu + nd + nw, nv + ndv, argb);
+            texFace(vertexconsumer, mesh$frame.pose, xs[0], by, zs[0], xs[1], by, zs[1], xs[2], by, zs[2], xs[3], by, zs[3], nu + nd + nw, nv, nu + nd + nw + nw, nv + ndv, argb);
+        }
+    }
+
     private static void skinPart(
         Mesh.Frame f,
         VertexConsumer buf,

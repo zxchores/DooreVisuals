@@ -10,8 +10,17 @@ import net.minecraft.screen.slot.SlotActionType;
 public final class InvClicks {
     private static final Queue<InvClicks.Click> Q = new ArrayDeque<>();
     private static int wait;
+    private static int delay = 2;
 
     private InvClicks() {
+    }
+
+    public static void setDelay(int ticks) {
+        delay = Math.max(0, Math.min(20, ticks));
+    }
+
+    public static int delay() {
+        return delay;
     }
 
     public static boolean busy() {
@@ -56,7 +65,7 @@ public final class InvClicks {
                 }
 
                 mc.interactionManager.clickSlot(i, invclicks$click.slot, invclicks$click.button, invclicks$click.type, clientplayerentity);
-                wait = 2;
+                wait = delay;
             }
         }
     }

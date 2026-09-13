@@ -51,7 +51,15 @@
 		"DamageRecapMixin",
 		"ShulkerTooltipMixin",
 		"GlintColorMixin",
-		"ItemModelGlintMixin"
+		"ItemModelGlintMixin",
+		"CommandFixMixin",
+		"PvpSaveMixin",
+		"LockSlotMixin",
+		"LockSlotMixin$Click",
+		"FriendsArmorMixin",
+		"FriendsArmorMixin$Dye",
+		"PlayerModelMixin",
+		"ChatEventsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

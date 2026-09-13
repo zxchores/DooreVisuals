@@ -222,7 +222,7 @@ public final class DooreMenuScreen extends Screen {
                 Paint.textC(g, s, this.width * 0.5F, this.height - 18.0F, Theme.MUTED, 7.2F);
             }
 
-            Paint.textR(g, "v3.30.2", this.width - 18, 16.0F, Theme.alpha(Theme.MUTED, 170), 8.0F);
+            Paint.textR(g, "v3.31.0", this.width - 18, 16.0F, Theme.alpha(Theme.MUTED, 170), 8.0F);
         });
     }
 

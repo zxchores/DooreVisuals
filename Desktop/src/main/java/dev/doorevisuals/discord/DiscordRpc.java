@@ -167,7 +167,7 @@ public final class DiscordRpc implements AutoCloseable {
         String sx;
         String s1;
         if (s.streamerSafe()) {
-            sx = "DooreVisuals 3.30.2";
+            sx = "DooreVisuals 3.31.0";
             s1 = "\u0412 \u0438\u0433\u0440\u0435";
         } else {
             ClientPlayerEntity clientplayerentity = minecraftclient.player;
@@ -183,7 +183,7 @@ public final class DiscordRpc implements AutoCloseable {
 
                 sx = stringbuilder.toString();
             } else {
-                sx = "DooreVisuals 3.30.2";
+                sx = "DooreVisuals 3.31.0";
             }
 
             if (s.showServer()) {

@@ -5,9 +5,8 @@ import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.draw.Nvg;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
-import dev.doorevisuals.tools.AuctionLore;
-import dev.doorevisuals.tools.FtHelperFeature;
-import dev.doorevisuals.tools.HwHelperFeature;
+import dev.doorevisuals.server.AhHelperFeature;
+import dev.doorevisuals.server.AutoInvestFeature;
 import dev.doorevisuals.tools.InvToolsFeature;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Click;
@@ -17,7 +16,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -44,20 +42,25 @@ public abstract class ContainerToolsMixin {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             HandledScreen<?> handledscreen = (HandledScreen<?>)(Object)this;
             if (!(handledscreen instanceof CreativeInventoryScreen)) {
-                Nvg.run(g, () -> {
-                    if (this.doore$storage(handledscreen)) {
-                        App.features().find(InvToolsFeature.class).filter(Feature::on).ifPresent(f -> {
-                            float fx = this.x + this.backgroundWidth + 6.0F;
-                            float f1 = this.y + 8.0F;
-                            doore$btn(g, mx, my, fx, f1, 64.0F, 16.0F, "\u0432\u044b\u0431\u0440\u043e\u0441");
-                            doore$btn(g, mx, my, fx, f1 + 20.0F, 64.0F, 16.0F, "\u0441\u043e\u0440\u0442");
-                        });
-                    }
+                Nvg.run(
+                    g,
+                    () -> {
+                        if (this.doore$storage(handledscreen)) {
+                            App.features().find(InvToolsFeature.class).filter(Feature::on).ifPresent(f -> {
+                                float fx = this.x + this.backgroundWidth + 6.0F;
+                                float f1 = this.y + 8.0F;
+                                doore$btn(g, mx, my, fx, f1, 64.0F, 16.0F, "выброс");
+                                doore$btn(g, mx, my, fx, f1 + 20.0F, 64.0F, 16.0F, "сорт");
+                            });
+                        }
 
-                    if (this.doore$ah(minecraftclient)) {
-                        this.doore$auction(g, mx, my);
+                        App.features().find(AhHelperFeature.class).filter(Feature::on).ifPresent(f -> f.paint(g, handledscreen, mx, my, this.x, this.y, this.backgroundWidth));
+                        App.features()
+                            .find(AutoInvestFeature.class)
+                            .filter(Feature::on)
+                            .ifPresent(f -> f.paint(g, handledscreen, mx, my, this.x, this.y, this.backgroundWidth));
                     }
-                });
+                );
             }
         }
     }
@@ -86,14 +89,13 @@ public abstract class ContainerToolsMixin {
                     }
                 }
 
-                if (this.doore$ah(minecraftclient)) {
-                    float f2 = this.x + this.backgroundWidth + 6.0F;
-                    float f3 = this.y + 52.0F;
-                    if (Paint.hit(d0, d1, f2, f3, 64.0F, 16.0F)) {
-                        double d2 = this.doore$cap();
-                        FtHelperFeature.autosell(minecraftclient, d2);
-                        cir.setReturnValue(true);
-                    }
+                if (App.features().find(AhHelperFeature.class).filter(Feature::on).map(f -> f.click(d0, d1, this.x, this.y, this.backgroundWidth)).orElse(false)
+                    || App.features()
+                        .find(AutoInvestFeature.class)
+                        .filter(Feature::on)
+                        .map(f -> f.click(d0, d1, this.x, this.y, this.backgroundWidth))
+                        .orElse(false)) {
+                    cir.setReturnValue(true);
                 }
             }
         }
@@ -104,69 +106,6 @@ public abstract class ContainerToolsMixin {
         return !(self instanceof InventoryScreen) && !(this.getScreenHandler() instanceof PlayerScreenHandler)
             ? this.getScreenHandler().slots.size() >= 54
             : false;
-    }
-
-    @Unique
-    private boolean doore$ah(MinecraftClient mc) {
-        if (!AuctionLore.auctionScreen(mc)) {
-            return false;
-        } else {
-            boolean flag = App.features().find(FtHelperFeature.class).filter(Feature::on).isPresent();
-            boolean flag1 = App.features().find(HwHelperFeature.class).filter(Feature::on).isPresent();
-            return flag || flag1;
-        }
-    }
-
-    @Unique
-    private double doore$cap() {
-        double d0 = App.features().find(FtHelperFeature.class).filter(Feature::on).map(FtHelperFeature::maxEach).orElse(0.0);
-        if (d0 <= 0.0) {
-            d0 = App.features().find(HwHelperFeature.class).filter(Feature::on).map(HwHelperFeature::maxEach).orElse(0.0);
-        }
-
-        return d0;
-    }
-
-    @Unique
-    private void doore$auction(DrawContext g, int mx, int my) {
-        double d0 = this.doore$cap();
-        double d1 = Double.MAX_VALUE;
-        Slot slot = null;
-
-        for (Slot slot1 : this.getScreenHandler().slots) {
-            AuctionLore.Deal auctionlore$deal = AuctionLore.parse(slot1.getStack());
-            if (auctionlore$deal != null && auctionlore$deal.each() < d1) {
-                d1 = auctionlore$deal.each();
-                slot = slot1;
-            }
-        }
-
-        for (Slot slot2 : this.getScreenHandler().slots) {
-            AuctionLore.Deal auctionlore$deal1 = AuctionLore.parse(slot2.getStack());
-            if (auctionlore$deal1 != null) {
-                float f = this.x + slot2.x;
-                float f1 = this.y + slot2.y;
-                boolean flag = slot2 == slot;
-                boolean flag1 = d0 > 0.0 && auctionlore$deal1.each() > d0;
-                int i = flag1 ? Theme.alpha(14830411, 50) : Theme.alpha(flag ? Theme.ACCENT : 0, flag ? 70 : 35);
-                Paint.box(g, f, f1, 16.0F, 16.0F, i, 2.0F);
-                String s = trimPrice(auctionlore$deal1.each());
-                Paint.text(g, s, f, f1 - 6.0F, flag ? Theme.ACCENT_HOT : Theme.TEXT, 5.2F);
-            }
-        }
-
-        float f2 = this.x + this.backgroundWidth + 6.0F;
-        float f3 = this.y + 52.0F;
-        doore$btn(g, mx, my, f2, f3, 64.0F, 16.0F, "\u0441\u0435\u043b\u043b");
-    }
-
-    @Unique
-    private static String trimPrice(double each) {
-        if (each >= 1000000.0) {
-            return String.format("%.1f\u043c", each / 1000000.0);
-        } else {
-            return each >= 1000.0 ? String.format("%.1f\u043a", each / 1000.0) : String.valueOf(Math.round(each));
-        }
     }
 
     @Unique
