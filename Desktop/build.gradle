@@ -1,0 +1,75 @@
+plugins {
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+base.archivesName = project.archives_base_name
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "net.fabricmc:fabric-language-kotlin:${project.kotlin_mod_version}"
+
+    include implementation('org.lwjgl:lwjgl-nanovg:3.3.3')
+    include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-linux')
+    include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows')
+    include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-macos')
+    include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-macos-arm64')
+
+    include implementation('com.kohlschutter.junixsocket:junixsocket-common:2.10.1')
+    include implementation('com.kohlschutter.junixsocket:junixsocket-native-common:2.10.1')
+    include implementation('net.lenni0451:Reflect:1.5.0')
+
+    implementation files('libs/DiscordIPC-0.11.0.jar')
+    implementation files('libs/core-0.2.3.jar')
+    implementation files('libs/windows-0.2.3.jar')
+    implementation files('libs/nvgrenderer.jar')
+}
+
+processResources {
+    def version = project.version
+    inputs.property 'version', version
+    filesMatching('fabric.mod.json') {
+        expand 'version': version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+    it.options.encoding = 'UTF-8'
+    it.options.compilerArgs << '-Xlint:none'
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+loom {
+    runs {
+        client {
+            programArgs '--width', '1280', '--height', '720', '--username', '67'
+            vmArgs '-Xmx2G'
+        }
+    }
+}
+
+jar {
+    from('LICENSE') {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(zipTree('libs/nvgrenderer.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/DiscordIPC-0.11.0.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/core-0.2.3.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/windows-0.2.3.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+}
