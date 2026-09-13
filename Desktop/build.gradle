@@ -54,6 +54,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+loom {
+    runs {
+        client {
+            programArgs '--width', '1280', '--height', '720', '--username', '67'
+            vmArgs '-Xmx2G'
+        }
+    }
+}
+
 jar {
     from('LICENSE') {
         rename { "${it}_${project.base.archivesName.get()}" }
