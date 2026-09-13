@@ -1,7 +1,7 @@
 package dev.doorevisuals.world;
 
 import dev.doorevisuals.draw.Theme;
-import net.minecraft.client.MinecraftClient;
+import dev.doorevisuals.tools.TimeWeatherFeature;
 import org.joml.Vector4f;
 
 public final class AmbienceFeature {
@@ -102,13 +102,7 @@ public final class AmbienceFeature {
     }
 
     private static float vanillaSunPhase() {
-        MinecraftClient minecraftclient = MinecraftClient.getInstance();
-        if (minecraftclient.world == null) {
-            return 0.5F;
-        } else {
-            long i = minecraftclient.world.getTimeOfDay();
-            return (float)((i % 24000L + 24000L) % 24000L) / 24000.0F;
-        }
+        return (float)((TimeWeatherFeature.visualTime() % 24000L + 24000L) % 24000L) / 24000.0F;
     }
 
     private static float[] weatherTint() {

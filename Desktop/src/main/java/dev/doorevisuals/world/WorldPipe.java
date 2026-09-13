@@ -43,6 +43,10 @@ public final class WorldPipe {
                     return true;
                 }
             });
+            WorldRenderEvents.BEFORE_ENTITIES.register(ctx -> safe(() -> {
+                float f = partial();
+                App.features().find(AtmosphereFeature.class).filter(Feature::on).ifPresent(fx -> fx.drawSky(ctx, f));
+            }));
             WorldRenderEvents.AFTER_ENTITIES.register((AfterEntities)ctx -> safe(() -> {
                 VisualQuality.beginFrame();
                 float f = partial();
@@ -56,7 +60,7 @@ public final class WorldPipe {
                 App.features().find(KillFxFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
                 App.features().find(GpsFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
                 App.features().find(MotionTrailFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
-                App.features().find(AtmosphereFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
+                App.features().find(AtmosphereFeature.class).filter(Feature::on).ifPresent(fx -> fx.drawFx(ctx, f));
                 App.features().find(CosmeticsFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
                 App.features().find(FunHelperFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));
                 App.features().find(BoreHelperFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx));

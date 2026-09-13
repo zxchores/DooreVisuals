@@ -1000,6 +1000,62 @@ public final class Mesh {
         }
     }
 
+    public static void skyDome(
+        WorldRenderContext ctx, double x, double y, double z, double r, int segs, int stacks, int zenith, int horizon, int nadir, RenderLayer type
+    ) {
+        Mesh.Frame mesh$frame = Mesh.Frame.of(ctx);
+        if (mesh$frame != null && !(r <= 1.0E-4) && segs >= 8) {
+            VertexConsumer vertexconsumer = mesh$frame.buf(type);
+            int i = Math.max(10, stacks * 2);
+            float[] afloat = rgba(zenith);
+            float[] afloat1 = rgba(horizon);
+            float[] afloat2 = rgba(nadir);
+
+            for (int j = 0; j < i; j++) {
+                double d0 = Math.PI * j / i;
+                double d1 = Math.PI * (j + 1) / i;
+                float f = (float)j / i;
+                float f1 = (float)(j + 1) / i;
+                float[] afloat3 = f < 0.5F ? mixRgba(afloat, afloat1, f * 2.0F) : mixRgba(afloat1, afloat2, (f - 0.5F) * 2.0F);
+                float[] afloat4 = f1 < 0.5F ? mixRgba(afloat, afloat1, f1 * 2.0F) : mixRgba(afloat1, afloat2, (f1 - 0.5F) * 2.0F);
+                double d2 = y + Math.cos(d0) * r;
+                double d3 = y + Math.cos(d1) * r;
+                double d4 = Math.sin(d0) * r;
+                double d5 = Math.sin(d1) * r;
+
+                for (int k = 0; k < segs; k++) {
+                    double d6 = k * Math.PI * 2.0 / segs;
+                    double d7 = (k + 1) * Math.PI * 2.0 / segs;
+                    quadTint(
+                        vertexconsumer,
+                        mesh$frame.pose,
+                        mesh$frame.x(x + Math.cos(d6) * d4),
+                        mesh$frame.y(d2),
+                        mesh$frame.z(z + Math.sin(d6) * d4),
+                        afloat3,
+                        mesh$frame.x(x + Math.cos(d7) * d4),
+                        mesh$frame.y(d2),
+                        mesh$frame.z(z + Math.sin(d7) * d4),
+                        afloat3,
+                        mesh$frame.x(x + Math.cos(d7) * d5),
+                        mesh$frame.y(d3),
+                        mesh$frame.z(z + Math.sin(d7) * d5),
+                        afloat4,
+                        mesh$frame.x(x + Math.cos(d6) * d5),
+                        mesh$frame.y(d3),
+                        mesh$frame.z(z + Math.sin(d6) * d5),
+                        afloat4
+                    );
+                }
+            }
+        }
+    }
+
+    private static float[] mixRgba(float[] a, float[] b, float t) {
+        t = Math.max(0.0F, Math.min(1.0F, t));
+        return new float[]{a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t};
+    }
+
     public static int alpha(int rgb, float a) {
         int i = Math.round(Math.max(0.04F, Math.min(1.0F, a)) * 255.0F);
         return i << 24 | rgb & 16777215;
