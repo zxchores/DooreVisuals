@@ -68,7 +68,7 @@ public final class AuctionLore {
             String s = stack.getName().getString();
             LoreComponent lorecomponent = (LoreComponent)stack.get(DataComponentTypes.LORE);
             if (lorecomponent != null) {
-                for (Text text : lorecomponent.comp_2400()) {
+                for (Text text : lorecomponent.lines()) {
                     s = s + "\n" + text.getString();
                 }
             }

@@ -1312,7 +1312,7 @@ public final class HudFeature extends Feature {
                     this.effectMax.put(s, k);
                     int l = Math.max(0, j / 20);
                     String s1 = j <= 0 ? "\u0432\u20ac\u045b" : l / 60 + ":" + String.format(Locale.ROOT, "%02d", l % 60);
-                    String s2 = ((StatusEffect)statuseffectinstance.getEffectType().comp_349()).getName().getString();
+                    String s2 = ((StatusEffect)statuseffectinstance.getEffectType().value()).getName().getString();
                     if (statuseffectinstance.getAmplifier() > 0) {
                         s2 = s2 + " " + (statuseffectinstance.getAmplifier() + 1);
                     }
@@ -1333,7 +1333,7 @@ public final class HudFeature extends Feature {
 
     private static String effectPath(StatusEffectInstance e) {
         return e.getEffectType().getKey().map(k -> k.getValue().getPath()).orElseGet(() -> {
-            String s = ((StatusEffect)e.getEffectType().comp_349()).getTranslationKey();
+            String s = ((StatusEffect)e.getEffectType().value()).getTranslationKey();
             int i = s.lastIndexOf(46);
             return i >= 0 ? s.substring(i + 1) : s;
         });

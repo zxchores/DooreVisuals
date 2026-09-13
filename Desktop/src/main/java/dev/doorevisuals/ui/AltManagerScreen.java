@@ -226,10 +226,10 @@ public final class AltManagerScreen extends Screen {
 
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 AltManagerScreen.Hit altmanagerscreen$hit = this.hits.get(i);
-                if (event.comp_4798() >= altmanagerscreen$hit.x
-                    && event.comp_4798() <= altmanagerscreen$hit.x + altmanagerscreen$hit.w
-                    && event.comp_4799() >= altmanagerscreen$hit.y
-                    && event.comp_4799() <= altmanagerscreen$hit.y + altmanagerscreen$hit.h) {
+                if (event.x() >= altmanagerscreen$hit.x
+                    && event.x() <= altmanagerscreen$hit.x + altmanagerscreen$hit.w
+                    && event.y() >= altmanagerscreen$hit.y
+                    && event.y() <= altmanagerscreen$hit.y + altmanagerscreen$hit.h) {
                     altmanagerscreen$hit.action.run();
                     flag = true;
                     break;
@@ -253,7 +253,7 @@ public final class AltManagerScreen extends Screen {
         if (!this.inputFocus) {
             return super.charTyped(event);
         } else {
-            char c0 = (char)event.comp_4793();
+            char c0 = (char)event.codepoint();
             if (c0 < ' ' || c0 == 127 || this.draft.length() >= 16 || (c0 < 'A' || c0 > 'Z') && (c0 < 'a' || c0 > 'z') && (c0 < '0' || c0 > '9') && c0 != '_') {
                 return true;
             } else {
@@ -264,7 +264,7 @@ public final class AltManagerScreen extends Screen {
     }
 
     public boolean keyPressed(KeyInput event) {
-        int i = event.comp_4795();
+        int i = event.key();
         if (i == 256) {
             this.client.setScreen(this.parent);
             return true;

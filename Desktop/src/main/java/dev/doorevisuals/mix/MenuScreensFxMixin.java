@@ -18,7 +18,7 @@ public class MenuScreensFxMixin {
     @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
     private void doore$menuBrand(DrawContext g, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         if (App.live()) {
-            Screen screen = (Screen)this;
+            Screen screen = (Screen)(Object)this;
             String s = titleOf(screen);
             if (s != null) {
                 MinecraftClient minecraftclient = MinecraftClient.getInstance();

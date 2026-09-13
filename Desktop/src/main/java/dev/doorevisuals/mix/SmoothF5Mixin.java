@@ -21,7 +21,7 @@ public abstract class SmoothF5Mixin {
     private void doore$smoothF5(World level, Entity entity, boolean detached, boolean mirrored, float partial, CallbackInfo ci) {
         if (SmoothF5Feature.active() && entity != null) {
             float f = SmoothF5Feature.blend();
-            Camera camera = (Camera)this;
+            Camera camera = (Camera)(Object)this;
             Vec3d vec3d = camera.getCameraPos();
             if (detached) {
                 doore$lastThird = vec3d;

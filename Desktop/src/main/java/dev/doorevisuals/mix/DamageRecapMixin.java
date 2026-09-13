@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class DamageRecapMixin {
     @Inject(method = "onDamaged", at = @At("HEAD"))
     private void doore$recap(DamageSource source, CallbackInfo ci) {
-        LivingEntity livingentity = (LivingEntity)this;
+        LivingEntity livingentity = (LivingEntity)(Object)this;
         MinecraftClient minecraftclient = MinecraftClient.getInstance();
         if (minecraftclient.player != null && livingentity == minecraftclient.player && source != null) {
             Entity entity = source.getAttacker();

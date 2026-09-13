@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ShulkerTooltipMixin {
     @Inject(method = "getTooltip", at = @At("RETURN"))
     private void doore$shulker(TooltipContext context, PlayerEntity player, TooltipType flag, CallbackInfoReturnable<List<Text>> cir) {
-        ItemStack itemstack = (ItemStack)this;
+        ItemStack itemstack = (ItemStack)(Object)this;
         if (itemstack.getItem() instanceof BlockItem blockitem && blockitem.getBlock() instanceof ShulkerBoxBlock) {
             ContainerComponent containercomponent = (ContainerComponent)itemstack.get(DataComponentTypes.CONTAINER);
             if (containercomponent != null) {

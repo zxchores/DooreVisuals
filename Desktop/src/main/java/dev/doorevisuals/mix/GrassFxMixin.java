@@ -14,7 +14,7 @@ public class GrassFxMixin {
     @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
     private void doore$grass(CallbackInfoReturnable<BlockRenderType> cir) {
         if (NoRenderFeature.grass()) {
-            BlockState blockstate = (BlockState)this;
+            BlockState blockstate = (BlockState)(Object)this;
             if (NoRenderFeature.isGrass(blockstate)) {
                 cir.setReturnValue(BlockRenderType.INVISIBLE);
             }

@@ -445,7 +445,7 @@ public final class DooreMenuScreen extends Screen {
         } else {
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 DooreMenuScreen.Hit dooremenuscreen$hit = this.hits.get(i);
-                if (Paint.hit(event.comp_4798(), event.comp_4799(), dooremenuscreen$hit.x, dooremenuscreen$hit.y, dooremenuscreen$hit.w, dooremenuscreen$hit.h)
+                if (Paint.hit(event.x(), event.y(), dooremenuscreen$hit.x, dooremenuscreen$hit.y, dooremenuscreen$hit.w, dooremenuscreen$hit.h)
                     )
                  {
                     dooremenuscreen$hit.action.run();

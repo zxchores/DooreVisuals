@@ -91,18 +91,18 @@ public abstract class ChatHudMixin {
             if (hudfeature != null) {
                 if (event.button() != 1) {
                     if (event.button() == 0) {
-                        if (hudfeature.tryIslandClick(event.comp_4798(), event.comp_4799())) {
+                        if (hudfeature.tryIslandClick(event.x(), event.y())) {
                             cir.setReturnValue(true);
                         } else {
                             List<HudSlot> list = new ArrayList<>(hudfeature.activeSlots());
 
                             for (int j = list.size() - 1; j >= 0; j--) {
                                 HudSlot hudslot1 = list.get(j);
-                                if (!hudslot1.locked() && hudfeature.hitSlot(hudslot1, event.comp_4798(), event.comp_4799())) {
+                                if (!hudslot1.locked() && hudfeature.hitSlot(hudslot1, event.x(), event.y())) {
                                     float[] afloat = hudfeature.editorRect(hudslot1);
                                     this.doore$drag = hudslot1;
-                                    this.doore$ox = (float)event.comp_4798() - afloat[0];
-                                    this.doore$oy = (float)event.comp_4799() - afloat[1];
+                                    this.doore$ox = (float)event.x() - afloat[0];
+                                    this.doore$oy = (float)event.y() - afloat[1];
                                     cir.setReturnValue(true);
                                     return;
                                 }
@@ -114,7 +114,7 @@ public abstract class ChatHudMixin {
                     boolean flag = GLFW.glfwGetKey(i, 340) == 1 || GLFW.glfwGetKey(i, 344) == 1;
 
                     for (HudSlot hudslot : hudfeature.activeSlots()) {
-                        if (hudfeature.hitSlot(hudslot, event.comp_4798(), event.comp_4799())) {
+                        if (hudfeature.hitSlot(hudslot, event.x(), event.y())) {
                             if (flag) {
                                 hudfeature.resetSlot(hudslot);
                             } else {

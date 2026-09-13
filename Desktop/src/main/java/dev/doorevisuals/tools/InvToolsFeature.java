@@ -61,7 +61,7 @@ public final class InvToolsFeature extends Feature {
         if (invtoolsfeature != null && mc.player != null && mc.currentScreen instanceof HandledScreen<?> handledscreen) {
             ScreenHandler screenhandler = handledscreen.getScreenHandler();
             int id = screenhandler.syncId;
-            ArrayList slots = new ArrayList();
+            ArrayList<Slot> slots = new ArrayList<>();
 
             for (Slot slot : screenhandler.slots) {
                 if (invtoolsfeature.dumpable(slot, mc.player)) {

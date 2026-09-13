@@ -39,8 +39,8 @@ public final class BlockHighlightFeature extends Feature {
     }
 
     private void draw(WorldRenderContext ctx, OutlineRenderState outline) {
-        BlockPos blockpos = outline.comp_4932();
-        VoxelShape voxelshape = outline.comp_4935();
+        BlockPos blockpos = outline.pos();
+        VoxelShape voxelshape = outline.shape();
         if (voxelshape != null && !voxelshape.isEmpty()) {
             int i = this.useTheme.get() ? Theme.EFFECT : (Integer)this.color.get();
             float f = this.alpha.f();

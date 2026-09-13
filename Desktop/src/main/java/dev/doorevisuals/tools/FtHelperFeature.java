@@ -131,9 +131,9 @@ public final class FtHelperFeature extends Feature implements Tick {
                 }
 
                 for (ScoreboardEntry scoreboardentry : scoreboard.getScoreboardEntries(scoreboardobjective)) {
-                    String s = scoreboardentry.comp_2127();
-                    if (scoreboardentry.comp_2129() != null) {
-                        s = scoreboardentry.comp_2129().getString();
+                    String s = scoreboardentry.owner();
+                    if (scoreboardentry.display() != null) {
+                        s = scoreboardentry.display().getString();
                     }
 
                     String s1 = matchTimer(s);

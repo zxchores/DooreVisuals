@@ -35,9 +35,9 @@ public final class AutoSprintFeature extends Feature implements Tick {
                         try {
                             PlayerInput playerinput = clientplayerentity.input.playerInput;
                             if ((Boolean)this.forwardOnly.get()) {
-                                flag = playerinput.comp_3159() && !playerinput.comp_3160();
+                                flag = playerinput.forward() && !playerinput.backward();
                             } else {
-                                flag = playerinput.comp_3159() || clientplayerentity.input.hasForwardMovement();
+                                flag = playerinput.forward() || clientplayerentity.input.hasForwardMovement();
                             }
                         } catch (Throwable throwable) {
                         }

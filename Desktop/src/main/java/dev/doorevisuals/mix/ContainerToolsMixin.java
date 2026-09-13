@@ -42,7 +42,7 @@ public abstract class ContainerToolsMixin {
     private void doore$overlay(DrawContext g, int mx, int my, float delta, CallbackInfo ci) {
         if (App.live()) {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
-            HandledScreen<?> handledscreen = (HandledScreen<?>)this;
+            HandledScreen<?> handledscreen = (HandledScreen<?>)(Object)this;
             if (!(handledscreen instanceof CreativeInventoryScreen)) {
                 Nvg.run(g, () -> {
                     if (this.doore$storage(handledscreen)) {
@@ -66,10 +66,10 @@ public abstract class ContainerToolsMixin {
     private void doore$click(Click event, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         if (App.live() && event.button() == 0) {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
-            HandledScreen<?> handledscreen = (HandledScreen<?>)this;
+            HandledScreen<?> handledscreen = (HandledScreen<?>)(Object)this;
             if (!(handledscreen instanceof CreativeInventoryScreen)) {
-                double d0 = event.comp_4798();
-                double d1 = event.comp_4799();
+                double d0 = event.x();
+                double d1 = event.y();
                 if (this.doore$storage(handledscreen) && App.features().find(InvToolsFeature.class).filter(Feature::on).isPresent()) {
                     float f = this.x + this.backgroundWidth + 6.0F;
                     float f1 = this.y + 8.0F;

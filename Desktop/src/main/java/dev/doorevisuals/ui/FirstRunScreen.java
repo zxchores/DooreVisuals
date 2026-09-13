@@ -185,10 +185,10 @@ public final class FirstRunScreen extends Screen {
         } else {
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 FirstRunScreen.Hit firstrunscreen$hit = this.hits.get(i);
-                if (event.comp_4798() >= firstrunscreen$hit.x
-                    && event.comp_4798() <= firstrunscreen$hit.x + firstrunscreen$hit.w
-                    && event.comp_4799() >= firstrunscreen$hit.y
-                    && event.comp_4799() <= firstrunscreen$hit.y + firstrunscreen$hit.h) {
+                if (event.x() >= firstrunscreen$hit.x
+                    && event.x() <= firstrunscreen$hit.x + firstrunscreen$hit.w
+                    && event.y() >= firstrunscreen$hit.y
+                    && event.y() <= firstrunscreen$hit.y + firstrunscreen$hit.h) {
                     firstrunscreen$hit.act.run();
                     return true;
                 }

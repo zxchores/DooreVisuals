@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 }
 
 version = project.mod_version
@@ -9,7 +9,6 @@ base.archivesName = project.archives_base_name
 repositories {
     mavenCentral()
     maven { url = 'https://maven.fabricmc.net/' }
-    maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
@@ -29,10 +28,10 @@ dependencies {
     include implementation('com.kohlschutter.junixsocket:junixsocket-native-common:2.10.1')
     include implementation('net.lenni0451:Reflect:1.5.0')
 
-    include implementation(files('libs/DiscordIPC-0.11.0.jar'))
-    include implementation(files('libs/core-0.2.3.jar'))
-    include implementation(files('libs/windows-0.2.3.jar'))
-    include implementation(files('libs/nvgrenderer.jar'))
+    implementation files('libs/DiscordIPC-0.11.0.jar')
+    implementation files('libs/core-0.2.3.jar')
+    implementation files('libs/windows-0.2.3.jar')
+    implementation files('libs/nvgrenderer.jar')
 }
 
 processResources {
@@ -59,4 +58,9 @@ jar {
     from('LICENSE') {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(zipTree('libs/nvgrenderer.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/DiscordIPC-0.11.0.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/core-0.2.3.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
+    from(zipTree('libs/windows-0.2.3.jar')) { exclude 'META-INF/**', 'fabric.mod.json' }
 }

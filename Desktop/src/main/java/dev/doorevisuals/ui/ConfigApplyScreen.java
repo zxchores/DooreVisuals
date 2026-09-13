@@ -95,10 +95,10 @@ public final class ConfigApplyScreen extends Screen {
     public boolean mouseClicked(Click event, boolean doubled) {
         if (event.button() != 0) {
             return super.mouseClicked(event, doubled);
-        } else if (Paint.hit(event.comp_4798(), event.comp_4799(), this.noX, this.by, this.bw, this.bh)) {
+        } else if (Paint.hit(event.x(), event.y(), this.noX, this.by, this.bw, this.bh)) {
             this.decline();
             return true;
-        } else if (Paint.hit(event.comp_4798(), event.comp_4799(), this.yesX, this.by, this.bw, this.bh)) {
+        } else if (Paint.hit(event.x(), event.y(), this.yesX, this.by, this.bw, this.bh)) {
             this.apply();
             return true;
         } else {
@@ -107,10 +107,10 @@ public final class ConfigApplyScreen extends Screen {
     }
 
     public boolean keyPressed(KeyInput event) {
-        if (event.comp_4795() == 256) {
+        if (event.key() == 256) {
             this.decline();
             return true;
-        } else if (event.comp_4795() != 257 && event.comp_4795() != 335) {
+        } else if (event.key() != 257 && event.key() != 335) {
             return super.keyPressed(event);
         } else {
             this.apply();
@@ -144,7 +144,8 @@ public final class ConfigApplyScreen extends Screen {
         this.close();
     }
 
-    private void close() {
+    @Override
+    public void close() {
         if (this.client != null) {
             this.client.setScreen(null);
         }

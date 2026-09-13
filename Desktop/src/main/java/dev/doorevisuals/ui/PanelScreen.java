@@ -1731,15 +1731,15 @@ public final class PanelScreen extends Screen {
         if (!flag1 && !flag) {
             return super.mouseClicked(event, doubled);
         } else {
-            if (this.overNav(event.comp_4798(), event.comp_4799())) {
+            if (this.overNav(event.x(), event.y())) {
                 this.navFront = true;
-            } else if (this.overBody(event.comp_4798(), event.comp_4799())) {
+            } else if (this.overBody(event.x(), event.y())) {
                 this.navFront = false;
             }
 
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 PanelScreen.Hit panelscreen$hit = this.hits.get(i);
-                if (Paint.hit(event.comp_4798(), event.comp_4799(), panelscreen$hit.x, panelscreen$hit.y, panelscreen$hit.w, panelscreen$hit.h)) {
+                if (Paint.hit(event.x(), event.y(), panelscreen$hit.x, panelscreen$hit.y, panelscreen$hit.w, panelscreen$hit.h)) {
                     if (flag && panelscreen$hit.right != null) {
                         panelscreen$hit.right.run();
                         GuiSfx.click();
@@ -1754,7 +1754,7 @@ public final class PanelScreen extends Screen {
                 }
             }
 
-            if (!this.overBody(event.comp_4798(), event.comp_4799()) && !this.overNav(event.comp_4798(), event.comp_4799())) {
+            if (!this.overBody(event.x(), event.y()) && !this.overNav(event.x(), event.y())) {
                 this.searchFocus = false;
                 this.themeNameFocus = false;
                 this.configNameFocus = false;
@@ -1764,7 +1764,7 @@ public final class PanelScreen extends Screen {
                 this.drop = null;
             }
 
-            if (this.colorPick != null && !Paint.hit(event.comp_4798(), event.comp_4799(), this.colorPick.x - 8.0F, this.colorPick.y - 8.0F, 156.0F, 158.0F)) {
+            if (this.colorPick != null && !Paint.hit(event.x(), event.y(), this.colorPick.x - 8.0F, this.colorPick.y - 8.0F, 156.0F, 158.0F)) {
                 this.colorPick = null;
             }
 
@@ -1773,9 +1773,9 @@ public final class PanelScreen extends Screen {
     }
 
     public boolean mouseDragged(Click event, double dx, double dy) {
-        if (PreviewPane.mouseDragged(event.comp_4798(), event.comp_4799(), dx, dy)) {
+        if (PreviewPane.mouseDragged(event.x(), event.y(), dx, dy)) {
             return true;
-        } else if (this.cosmeticsOpen && CosmeticsDrawer.mouseDragged(event.comp_4798(), event.comp_4799(), dx, dy)) {
+        } else if (this.cosmeticsOpen && CosmeticsDrawer.mouseDragged(event.x(), event.y(), dx, dy)) {
             return true;
         } else {
             if (this.dockHold != null) {
@@ -1786,8 +1786,8 @@ public final class PanelScreen extends Screen {
             }
 
             if (this.bannerDown && !this.draggingNav) {
-                float f = (float)event.comp_4798() - this.bannerStartX;
-                float f1 = (float)event.comp_4799() - this.bannerStartY;
+                float f = (float)event.x() - this.bannerStartX;
+                float f1 = (float)event.y() - this.bannerStartY;
                 if (f * f + f1 * f1 > 36.0F) {
                     this.bannerDragged = true;
                     this.draggingNav = true;
@@ -1796,15 +1796,15 @@ public final class PanelScreen extends Screen {
             }
 
             if (this.draggingNav) {
-                GuiLayout.navX = this.clampX((float)event.comp_4798() - this.dragOffX, 200.0F * this.uiScale);
-                GuiLayout.navY = this.clampY((float)event.comp_4799() - this.dragOffY, 470.0F * this.uiScale);
+                GuiLayout.navX = this.clampX((float)event.x() - this.dragOffX, 200.0F * this.uiScale);
+                GuiLayout.navY = this.clampY((float)event.y() - this.dragOffY, 470.0F * this.uiScale);
                 return true;
             } else if (this.draggingBody) {
-                GuiLayout.bodyX = this.clampX((float)event.comp_4798() - this.dragOffX, 470.0F * this.uiScale);
-                GuiLayout.bodyY = this.clampY((float)event.comp_4799() - this.dragOffY, 470.0F * this.uiScale);
+                GuiLayout.bodyX = this.clampX((float)event.x() - this.dragOffX, 470.0F * this.uiScale);
+                GuiLayout.bodyY = this.clampY((float)event.y() - this.dragOffY, 470.0F * this.uiScale);
                 return true;
             } else if (this.dragNum != null) {
-                this.applyDrag(event.comp_4798());
+                this.applyDrag(event.x());
                 return true;
             } else {
                 if (this.colorPick != null && leftDown()) {
@@ -1812,13 +1812,13 @@ public final class PanelScreen extends Screen {
                     float f5 = this.colorPick.y;
                     float f2 = f4 + 64.0F;
                     float f3 = f5 + 78.0F;
-                    if (Paint.hit(event.comp_4798(), event.comp_4799(), f2 - 52.0F, f3 - 52.0F, 104.0F, 104.0F)) {
-                        this.pickHsvCircle(this.colorPick, f2, f3, 52.0F, (float)event.comp_4798(), (float)event.comp_4799());
+                    if (Paint.hit(event.x(), event.y(), f2 - 52.0F, f3 - 52.0F, 104.0F, 104.0F)) {
+                        this.pickHsvCircle(this.colorPick, f2, f3, 52.0F, (float)event.x(), (float)event.y());
                         return true;
                     }
 
-                    if (Paint.hit(event.comp_4798(), event.comp_4799(), f4 + 8.0F, f5 + 138.0F, 120.0F, 10.0F)) {
-                        this.colorPick.v = Math.max(0.0F, Math.min(1.0F, ((float)event.comp_4798() - (f4 + 8.0F)) / 120.0F));
+                    if (Paint.hit(event.x(), event.y(), f4 + 8.0F, f5 + 138.0F, 120.0F, 10.0F)) {
+                        this.colorPick.v = Math.max(0.0F, Math.min(1.0F, ((float)event.x() - (f4 + 8.0F)) / 120.0F));
                         applyPickedColor(this.colorPick, hsvToRgb(this.colorPick.h, this.colorPick.s, this.colorPick.v));
                         return true;
                     }
@@ -1877,7 +1877,7 @@ public final class PanelScreen extends Screen {
     }
 
     public boolean charTyped(CharInput event) {
-        char c0 = (char)event.comp_4793();
+        char c0 = (char)event.codepoint();
         if (this.numEdit == null || !Character.isDigit(c0) && c0 != '.' && c0 != '-' && c0 != ',') {
             if (this.themeNameFocus) {
                 App.features().find(ThemeFeature.class).ifPresent(tf -> tf.setDraftName(tf.draftName() + c0));
@@ -1904,25 +1904,25 @@ public final class PanelScreen extends Screen {
 
     public boolean keyPressed(KeyInput event) {
         if (this.numEdit != null) {
-            if (event.comp_4795() == 257 || event.comp_4795() == 335) {
+            if (event.key() == 257 || event.key() == 335) {
                 this.numEdit.commit();
                 this.numEdit = null;
                 return true;
             }
 
-            if (event.comp_4795() == 256) {
+            if (event.key() == 256) {
                 this.numEdit = null;
                 return true;
             }
 
-            if (event.comp_4795() == 259 && !this.numEdit.buf.isEmpty()) {
+            if (event.key() == 259 && !this.numEdit.buf.isEmpty()) {
                 this.numEdit.buf = this.numEdit.buf.substring(0, this.numEdit.buf.length() - 1);
                 return true;
             }
         }
 
         if (this.capture != null) {
-            this.capture.set(event.comp_4795() == 256 ? -1 : event.comp_4795());
+            this.capture.set(event.key() == 256 ? -1 : event.key());
             if (this.captureOwner != null) {
                 this.captureOwner.poke();
             }
@@ -1931,14 +1931,14 @@ public final class PanelScreen extends Screen {
             this.captureOwner = null;
             return true;
         } else {
-            boolean flag = (event.comp_4797() & 2) != 0 || GLFW.glfwGetKey(MinecraftClient.getInstance().getWindow().getHandle(), 341) == 1;
-            if (flag && event.comp_4795() == 70) {
+            boolean flag = (event.modifiers() & 2) != 0 || GLFW.glfwGetKey(MinecraftClient.getInstance().getWindow().getHandle(), 341) == 1;
+            if (flag && event.key() == 70) {
                 this.searchFocus = true;
                 this.themeNameFocus = false;
                 this.configNameFocus = false;
                 return true;
             } else {
-                if (event.comp_4795() == 259) {
+                if (event.key() == 259) {
                     if (this.themeNameFocus) {
                         App.features().find(ThemeFeature.class).ifPresent(tf -> {
                             String s = tf.draftName();
@@ -1975,7 +1975,7 @@ public final class PanelScreen extends Screen {
                     }
                 }
 
-                if (event.comp_4795() != 256) {
+                if (event.key() != 256) {
                     return super.keyPressed(event);
                 } else if (this.bannerPick) {
                     this.bannerPick = false;

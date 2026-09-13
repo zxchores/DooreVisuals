@@ -22,7 +22,7 @@ public abstract class IslandMouseMixin {
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
     private void doore$island(long window, MouseInput info, int action, CallbackInfo ci) {
         if (this.client != null && this.client.currentScreen == null && App.live() && action == 1) {
-            if (info.comp_4801() == 0) {
+            if (info.button() == 0) {
                 HudFeature hudfeature = App.features().find(HudFeature.class).filter(Feature::on).orElse(null);
                 if (hudfeature != null) {
                     double d0 = this.client.mouse.getX()

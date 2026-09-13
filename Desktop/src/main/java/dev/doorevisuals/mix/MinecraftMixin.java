@@ -20,7 +20,7 @@ public abstract class MinecraftMixin {
     private void doore$customTitle(Screen screen, CallbackInfo ci) {
         if (screen instanceof TitleScreen && !(screen instanceof DooreMenuScreen)) {
             ci.cancel();
-            ((MinecraftClient)this).setScreen(new DooreMenuScreen());
+            ((MinecraftClient)(Object)this).setScreen(new DooreMenuScreen());
         }
     }
 

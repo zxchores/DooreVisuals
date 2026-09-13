@@ -25,7 +25,7 @@ public abstract class FreeLookCameraMixin {
     @Inject(method = "update", at = @At("RETURN"))
     private void doore$freeLookReturn(World level, Entity entity, boolean detached, boolean mirrored, float partial, CallbackInfo ci) {
         if (FreeLookFeature.active() && detached && mirrored) {
-            ((CameraAccessor)this).doore$setRotation(FreeLookFeature.yaw() + 180.0F, -FreeLookFeature.pitch());
+            ((CameraAccessor)(Object)this).doore$setRotation(FreeLookFeature.yaw() + 180.0F, -FreeLookFeature.pitch());
         }
     }
 

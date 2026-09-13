@@ -115,7 +115,7 @@ public final class AutoSwapFeature extends Feature implements Tick {
         StringBuilder stringbuilder = new StringBuilder(s);
         LoreComponent lorecomponent = (LoreComponent)st.get(DataComponentTypes.LORE);
         if (lorecomponent != null) {
-            for (Text text : lorecomponent.comp_2400()) {
+            for (Text text : lorecomponent.lines()) {
                 stringbuilder.append(' ').append(text.getString().toLowerCase(Locale.ROOT));
             }
         }

@@ -95,10 +95,10 @@ public final class ChangelogScreen extends Screen {
         } else {
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 ChangelogScreen.Hit changelogscreen$hit = this.hits.get(i);
-                if (event.comp_4798() >= changelogscreen$hit.x
-                    && event.comp_4798() <= changelogscreen$hit.x + changelogscreen$hit.w
-                    && event.comp_4799() >= changelogscreen$hit.y
-                    && event.comp_4799() <= changelogscreen$hit.y + changelogscreen$hit.h) {
+                if (event.x() >= changelogscreen$hit.x
+                    && event.x() <= changelogscreen$hit.x + changelogscreen$hit.w
+                    && event.y() >= changelogscreen$hit.y
+                    && event.y() <= changelogscreen$hit.y + changelogscreen$hit.h) {
                     changelogscreen$hit.act.run();
                     return true;
                 }

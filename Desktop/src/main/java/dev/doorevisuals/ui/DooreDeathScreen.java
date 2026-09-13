@@ -161,7 +161,7 @@ public final class DooreDeathScreen extends DeathScreen {
             for (int i = this.hits.size() - 1; i >= 0; i--) {
                 DooreDeathScreen.Hit dooredeathscreen$hit = this.hits.get(i);
                 if (Paint.hit(
-                    event.comp_4798(), event.comp_4799(), dooredeathscreen$hit.x, dooredeathscreen$hit.y, dooredeathscreen$hit.w, dooredeathscreen$hit.h
+                    event.x(), event.y(), dooredeathscreen$hit.x, dooredeathscreen$hit.y, dooredeathscreen$hit.w, dooredeathscreen$hit.h
                 )) {
                     dooredeathscreen$hit.action.run();
                     return true;

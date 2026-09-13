@@ -18,7 +18,7 @@ public abstract class EntityNameTagMixin {
     private void doore$badge(CallbackInfoReturnable<Text> cir) {
         if (App.live()) {
             Text text = (Text)cir.getReturnValue();
-            Entity entity = (Entity)this;
+            Entity entity = (Entity)(Object)this;
             if (FriendsFeature.isFriend(entity.getUuid())) {
                 int i = FriendsFeature.nickColor();
                 Text text2 = text == null ? Text.empty() : text.copy().styled(s -> s.withColor(i));

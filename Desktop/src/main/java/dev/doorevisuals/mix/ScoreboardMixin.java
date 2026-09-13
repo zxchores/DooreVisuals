@@ -69,14 +69,14 @@ public class ScoreboardMixin {
             List<String> list2 = new ArrayList<>();
 
             for (ScoreboardEntry scoreboardentry1 : list) {
-                String s1 = scoreboardentry1.comp_2127() == null ? "" : scoreboardentry1.comp_2127();
-                if (scoreboardentry1.comp_2129() != null) {
-                    s1 = scoreboardentry1.comp_2129().getString();
+                String s1 = scoreboardentry1.owner() == null ? "" : scoreboardentry1.owner();
+                if (scoreboardentry1.display() != null) {
+                    s1 = scoreboardentry1.display().getString();
                 }
 
                 list1.add(s1);
                 f = Math.max(f, (float)Paint.tw(s1, f6));
-                String s2 = flag ? "" : String.valueOf(scoreboardentry1.comp_2128());
+                String s2 = flag ? "" : String.valueOf(scoreboardentry1.value());
                 list2.add(s2);
                 if (!s2.isEmpty()) {
                     f1 = Math.max(f1, (float)Paint.tw(s2, f6));

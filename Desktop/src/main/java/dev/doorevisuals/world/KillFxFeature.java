@@ -191,7 +191,7 @@ public final class KillFxFeature extends Feature implements Tick {
     private static Identifier skinOf(LivingEntity e) {
         try {
             if (e instanceof AbstractClientPlayerEntity abstractclientplayerentity) {
-                return abstractclientplayerentity.getSkin().comp_1626().comp_3627();
+                return abstractclientplayerentity.getSkin().body().texturePath();
             }
 
             if (e instanceof PlayerEntity) {
