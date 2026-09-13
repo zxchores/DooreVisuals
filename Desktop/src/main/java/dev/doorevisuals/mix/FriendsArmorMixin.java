@@ -49,7 +49,7 @@ public abstract class FriendsArmorMixin {
             at = @At("RETURN"),
             cancellable = true
         )
-        private void doore$dye(CallbackInfoReturnable<Integer> cir) {
+        private static void doore$dye(CallbackInfoReturnable<Integer> cir) {
             Integer integer = FriendsArmorMixin.TINT.get();
             if (integer != null) {
                 int i = cir.getReturnValue() == null ? -1 : cir.getReturnValue();
