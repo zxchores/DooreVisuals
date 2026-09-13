@@ -9,16 +9,18 @@ import dev.doorevisuals.data.FirstRun;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Sprites;
 import dev.doorevisuals.draw.Theme;
-import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.screen.option.OptionsScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.network.ServerInfo.ServerType;
@@ -26,10 +28,7 @@ import net.minecraft.client.option.ServerList;
 import net.minecraft.text.Text;
 
 public final class DooreMenuScreen extends Screen {
-    private final List<DooreMenuScreen.Hit> hits = new ArrayList<>();
     private final List<Changelog.Entry> news = Changelog.load();
-    private int mx;
-    private int my;
 
     public DooreMenuScreen() {
         super(Text.literal("DooreVisuals"));
@@ -41,7 +40,36 @@ public final class DooreMenuScreen extends Screen {
         AltsStore.boot();
         if (FirstRun.needsWizard() && this.client != null) {
             this.client.setScreen(new FirstRunScreen(this));
+        } else {
+            this.buildButtons();
         }
+    }
+
+    private void buildButtons() {
+        int i = Math.min(280, Math.max(220, this.width * 32 / 100));
+        int j = (this.width - i) / 2;
+        int k = Math.round(this.height * 0.46F);
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, k, i, 28, Text.literal("Одиночная игра"), true, () -> this.client.setScreen(new SelectWorldScreen(this))));
+        this.addDrawableChild(
+            new DooreMenuScreen.MenuButton(j, k + 34, i, 28, Text.literal("Мультиплеер"), false, () -> this.client.setScreen(new MultiplayerScreen(this)))
+        );
+        DooreMenuScreen.LastServer dooremenuscreen$lastserver = this.resolveLastServer();
+        int l = k + 68;
+        if (dooremenuscreen$lastserver != null) {
+            this.addDrawableChild(
+                new DooreMenuScreen.MenuButton(j, l, i, 28, Text.literal(dooremenuscreen$lastserver.label), false, () -> this.connectLast(dooremenuscreen$lastserver))
+            );
+            l += 34;
+        }
+
+        int i1 = (i - 8) / 2;
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, l, i1, 26, Text.literal("Аккаунты"), false, () -> this.client.setScreen(new AltManagerScreen(this))));
+        this.addDrawableChild(
+            new DooreMenuScreen.MenuButton(
+                j + i1 + 8, l, i1, 26, Text.literal("Настройки"), false, () -> this.client.setScreen(new OptionsScreen(this, this.client.options))
+            )
+        );
+        this.addDrawableChild(new DooreMenuScreen.MenuButton(j, l + 32, i, 26, Text.literal("Выход"), false, () -> this.client.scheduleStop()));
     }
 
     @Override
@@ -51,20 +79,15 @@ public final class DooreMenuScreen extends Screen {
 
     @Override
     public void render(DrawContext g, int mouseX, int mouseY, float partialTick) {
-        this.mx = mouseX;
-        this.my = mouseY;
-        this.hits.clear();
         this.renderBackground(g, mouseX, mouseY, partialTick);
         this.paintBrand(g);
-        this.paintButtons(g);
-        this.paintFooter(g);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
     private void paintBrand(DrawContext g) {
         float f = this.width * 0.5F;
-        float f1 = this.height * 0.22F;
-        int i = Math.round(Math.min(96.0F, Math.max(64.0F, this.height * 0.12F)));
+        float f1 = Math.max(56.0F, this.height * 0.16F);
+        int i = Math.round(Math.min(84.0F, Math.max(56.0F, this.height * 0.1F)));
 
         try {
             g.drawTexture(RenderPipelines.GUI_TEXTURED, Sprites.CLIENT_ICON, Math.round(f) - i / 2, Math.round(f1) - i / 2, 0.0F, 0.0F, i, i, i, i);
@@ -75,66 +98,20 @@ public final class DooreMenuScreen extends Screen {
             }
         }
 
-        Paint.textC(g, "DOORE Visuals", f, f1 + i * 0.55F + 8.0F, Theme.TEXT, 18.0F);
+        g.drawTextWithShadow(this.textRenderer, "DOORE Visuals", Math.round(f) - this.textRenderer.getWidth("DOORE Visuals") / 2, Math.round(f1 + i * 0.55F + 6.0F), Theme.TEXT);
         Account.ensure();
         String s = Account.nick();
-        Paint.textC(
-            g,
-            (s == null || s.isBlank() ? "visual client" : s) + "  ·  v" + DooreClient.VERSION,
-            f,
-            f1 + i * 0.55F + 30.0F,
-            Theme.MUTED,
-            9.0F
-        );
+        String s1 = (s == null || s.isBlank() ? "visual client" : s) + "  ·  v" + DooreClient.VERSION;
+        g.drawTextWithShadow(this.textRenderer, s1, Math.round(f) - this.textRenderer.getWidth(s1) / 2, Math.round(f1 + i * 0.55F + 20.0F), Theme.MUTED);
         if (!this.news.isEmpty() && ChangelogSeen.hasNew()) {
             Changelog.Entry changelog$entry = this.news.getFirst();
-            String s1 = "NEW  ·  v" + changelog$entry.version() + "  ·  " + changelog$entry.title();
-            float f2 = Math.min(320.0F, Math.max(180.0F, Paint.tw(s1, 7.5F) + 28.0F));
-            float f3 = f - f2 * 0.5F;
-            float f4 = f1 + i * 0.55F + 48.0F;
-            Paint.box(g, f3, f4, f2, 20.0F, Theme.alpha(Theme.ACCENT, 40), 8.0F);
-            Paint.textC(g, s1, f, f4 + 5.0F, Theme.ACCENT_HOT, 7.5F);
-            this.hits.add(new DooreMenuScreen.Hit(f3, f4, f2, 20.0F, () -> this.client.setScreen(new ChangelogScreen(this))));
+            String s2 = "NEW  ·  v" + changelog$entry.version() + "  ·  " + changelog$entry.title();
+            int j = Math.min(340, Math.max(160, this.textRenderer.getWidth(s2) + 20));
+            int k = Math.round(f) - j / 2;
+            int l = Math.round(f1 + i * 0.55F + 36.0F);
+            Paint.box(g, k, l, j, 16.0F, Theme.alpha(Theme.ACCENT, 50), 6.0F);
+            g.drawTextWithShadow(this.textRenderer, s2, Math.round(f) - this.textRenderer.getWidth(s2) / 2, l + 4, Theme.ACCENT_HOT);
         }
-    }
-
-    private void paintButtons(DrawContext g) {
-        float f = Math.min(280.0F, Math.max(220.0F, this.width * 0.32F));
-        float f1 = (this.width - f) * 0.5F;
-        float f2 = this.height * 0.48F;
-        this.button(g, f1, f2, f, 36.0F, "Одиночная игра", true, () -> this.client.setScreen(new SelectWorldScreen(this)));
-        this.button(g, f1, f2 + 44.0F, f, 36.0F, "Мультиплеер", false, () -> this.client.setScreen(new MultiplayerScreen(this)));
-        DooreMenuScreen.LastServer dooremenuscreen$lastserver = this.resolveLastServer();
-        float f3 = f2 + 88.0F;
-        if (dooremenuscreen$lastserver != null) {
-            this.button(g, f1, f3, f, 36.0F, dooremenuscreen$lastserver.label, false, () -> this.connectLast(dooremenuscreen$lastserver));
-            f3 += 44.0F;
-        }
-
-        float f4 = (f - 12.0F) / 2.0F;
-        this.button(g, f1, f3, f4, 32.0F, "Аккаунты", false, () -> this.client.setScreen(new AltManagerScreen(this)));
-        this.button(g, f1 + f4 + 12.0F, f3, f4, 32.0F, "Настройки", false, () -> this.client.setScreen(new OptionsScreen(this, this.client.options)));
-        this.button(g, f1, f3 + 40.0F, f, 32.0F, "Выход", false, () -> this.client.scheduleStop());
-    }
-
-    private void paintFooter(DrawContext g) {
-        if (!this.news.isEmpty() && !ChangelogSeen.hasNew()) {
-            Changelog.Entry changelog$entry = this.news.getFirst();
-            Paint.textC(g, "v" + changelog$entry.version() + "  ·  " + changelog$entry.title(), this.width * 0.5F, this.height - 22.0F, Theme.GHOST, 7.0F);
-        }
-    }
-
-    private void button(DrawContext g, float x, float y, float w, float h, String label, boolean primary, Runnable action) {
-        boolean flag = Paint.hit((double)this.mx, (double)this.my, x, y, w, h);
-        int i = Theme.alpha(primary || flag ? Theme.ACCENT : 16777215, primary || flag ? 70 : 16);
-        Paint.box(g, x, y, w, h, i, 8.0F);
-        Paint.outline(g, x, y, w, h, Theme.alpha(primary || flag ? Theme.ACCENT : 16777215, flag ? 180 : 50), 8.0F);
-        if (primary) {
-            Paint.box(g, x, y, 3.0F, h, Theme.ACCENT, 0.0F);
-        }
-
-        Paint.textC(g, label, x + w * 0.5F, y + h * 0.32F, flag || primary ? Theme.ACCENT_HOT : Theme.TEXT, 11.0F);
-        this.hits.add(new DooreMenuScreen.Hit(x, y, w, h, action));
     }
 
     private DooreMenuScreen.LastServer resolveLastServer() {
@@ -150,14 +127,6 @@ public final class DooreMenuScreen extends Screen {
                     ServerInfo serverinfo = serverlist.get(s);
                     if (serverinfo != null && serverinfo.name != null && !serverinfo.name.isBlank()) {
                         s1 = serverinfo.name;
-                    } else {
-                        for (int i = 0; i < serverlist.size(); i++) {
-                            ServerInfo serverinfo1 = serverlist.get(i);
-                            if (serverinfo1 != null && s.equalsIgnoreCase(serverinfo1.address)) {
-                                s1 = serverinfo1.name != null && !serverinfo1.name.isBlank() ? serverinfo1.name : s;
-                                break;
-                            }
-                        }
                     }
                 } catch (Throwable throwable) {
                 }
@@ -180,26 +149,49 @@ public final class DooreMenuScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click event, boolean doubled) {
-        if (event.button() == 0) {
-            for (int i = this.hits.size() - 1; i >= 0; i--) {
-                DooreMenuScreen.Hit dooremenuscreen$hit = this.hits.get(i);
-                if (Paint.hit(event.x(), event.y(), dooremenuscreen$hit.x, dooremenuscreen$hit.y, dooremenuscreen$hit.w, dooremenuscreen$hit.h)) {
-                    dooremenuscreen$hit.action.run();
-                    return true;
-                }
-            }
-        }
-
-        return super.mouseClicked(event, doubled);
-    }
-
-    @Override
     public boolean shouldCloseOnEsc() {
         return false;
     }
 
-    private record Hit(float x, float y, float w, float h, Runnable action) {
+    private static final class MenuButton extends ClickableWidget {
+        private final boolean primary;
+        private final Runnable action;
+
+        MenuButton(int x, int y, int w, int h, Text label, boolean primary, Runnable action) {
+            super(x, y, w, h, label);
+            this.primary = primary;
+            this.action = action;
+        }
+
+        @Override
+        protected void renderWidget(DrawContext g, int mouseX, int mouseY, float delta) {
+            boolean flag = this.isHovered();
+            int i = this.getX();
+            int j = this.getY();
+            int k = this.getWidth();
+            int l = this.getHeight();
+            int i1 = Theme.alpha(this.primary || flag ? Theme.ACCENT : 394758, this.primary || flag ? 210 : 200);
+            Paint.box(g, i, j, k, l, i1, 6.0F);
+            Paint.outline(g, i, j, k, l, Theme.alpha(this.primary || flag ? Theme.ACCENT_HOT : 16777215, flag ? 200 : 70), 6.0F);
+            if (this.primary) {
+                Paint.box(g, i, j, 3.0F, l, Theme.ACCENT_HOT, 0.0F);
+            }
+
+            int j1 = this.primary || flag ? Theme.TEXT : -1;
+            int k1 = MinecraftClient.getInstance().textRenderer.getWidth(this.getMessage());
+            g.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, this.getMessage(), i + (k - k1) / 2, j + (l - 8) / 2, j1);
+        }
+
+        @Override
+        public void onClick(Click click, boolean doubled) {
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            this.action.run();
+        }
+
+        @Override
+        protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+            this.appendDefaultNarrations(builder);
+        }
     }
 
     private record LastServer(String label, String ip) {
