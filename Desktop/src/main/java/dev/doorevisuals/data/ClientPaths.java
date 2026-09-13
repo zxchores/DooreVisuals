@@ -77,11 +77,43 @@ public final class ClientPaths {
         return path;
     }
 
+    public static Path models() {
+        Path path = root().resolve("models");
+
+        try {
+            Files.createDirectories(path);
+            Path path1 = path.resolve("PUT_MODEL_HERE.txt");
+            if (!Files.exists(path1)) {
+                Files.writeString(
+                    path1,
+                    "Put a folder per model: model.json (Blockbench bedrock/geo), texture.png, optional animation.json\n"
+                );
+            }
+        } catch (Exception exception) {
+        }
+
+        return path;
+    }
+
+    public static Path invPresets() {
+        Path path = root().resolve("inv_presets.json");
+        if (!Files.exists(path)) {
+            try {
+                Files.writeString(path, "{\n  \"pvp\": [\"меч\", \"сфера\", \"\", \"\", \"\", \"\", \"\", \"\", \"яблоко\"],\n  \"farm\": [\"кирка\", \"лопата\", \"\", \"\", \"\", \"\", \"\", \"\", \"еда\"]\n}\n");
+            } catch (Exception exception) {
+            }
+        }
+
+        return path;
+    }
+
     public static void ensureAll() {
         root();
         configs();
         themes();
         cosmetics();
+        models();
+        invPresets();
         Path path = banners();
         Path path1 = path.resolve("PUT_PNG_GIF_OR_MP4_HERE.txt");
         if (!Files.exists(path1)) {

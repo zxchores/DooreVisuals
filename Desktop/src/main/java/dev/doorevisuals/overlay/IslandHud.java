@@ -6,7 +6,7 @@ import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.media.CoverArt;
 import dev.doorevisuals.media.MediaHub;
-import dev.doorevisuals.tools.FtHelperFeature;
+import dev.doorevisuals.server.FunHelperFeature;
 import java.util.ArrayDeque;
 import java.util.Locale;
 import net.minecraft.client.MinecraftClient;
@@ -110,7 +110,7 @@ public final class IslandHud {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             this.prune();
             this.pulseMedia();
-            String s = FtHelperFeature.trapText();
+            String s = FunHelperFeature.trapText();
             boolean flag = s != null && !s.isBlank();
             if (flag && !s.equals(this.lastTrap)) {
                 this.push("FunTime", s);

@@ -40,6 +40,7 @@ public final class FriendsFeature extends Feature implements Tick {
     private final Opt.Flag pingBar = this.opt(new Opt.Flag("ping_bar", "\u041f\u043e\u043b\u043e\u0441\u043a\u0430 \u043f\u0438\u043d\u0433\u0430", true));
     private final Opt.Tint color = this.opt(new Opt.Tint("color", "\u0426\u0432\u0435\u0442 \u043d\u0438\u043a\u0430", -8458284));
     private final Opt.Flag worldMark = this.opt(new Opt.Flag("world_mark", "\u041c\u0435\u0442\u043a\u0430 \u0432 \u043c\u0438\u0440\u0435", true));
+    private final Opt.Flag armorTint = this.opt(new Opt.Flag("armor_tint", "Цвет брони", true));
     private final Map<UUID, String> friends = new LinkedHashMap<>();
     private volatile List<FriendsFeature.Mark> marks = List.of();
     private boolean addWasDown;
@@ -74,6 +75,25 @@ public final class FriendsFeature extends Feature implements Tick {
     public static boolean worldMark() {
         FriendsFeature friendsfeature = live;
         return friendsfeature != null && friendsfeature.on() && (Boolean)friendsfeature.worldMark.get();
+    }
+
+    public static boolean armorTint() {
+        FriendsFeature friendsfeature = live;
+        return friendsfeature != null && friendsfeature.on() && (Boolean)friendsfeature.armorTint.get();
+    }
+
+    public static int armorColor(int entityId) {
+        if (!armorTint()) {
+            return -1;
+        } else {
+            MinecraftClient minecraftclient = MinecraftClient.getInstance();
+            if (minecraftclient.world == null) {
+                return -1;
+            } else {
+                net.minecraft.entity.Entity entity = minecraftclient.world.getEntityById(entityId);
+                return entity instanceof PlayerEntity playerentity && isFriend(playerentity.getUuid()) ? nickColor() : -1;
+            }
+        }
     }
 
     public static boolean tabGlass() {
