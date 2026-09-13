@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "doorevisuals",
+  "version": "${version}",
+  "name": "DooreVisuals",
+  "description": "DooreVisuals — visual PvP client + server relay for cosmetics.",
+  "authors": ["DooreVisuals"],
+  "license": "MIT",
+  "icon": "assets/doorevisuals/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.doorevisuals.DooreClient",
+      {
+        "value": "com.github.noamm9.nvgrenderer.Nvgrenderer",
+        "adapter": "kotlin"
+      }
+    ],
+    "server": ["dev.doorevisuals.DooreServer"]
+  },
+  "mixins": ["doorevisuals.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*",
+    "fabric-language-kotlin": "*"
+  }
+}
