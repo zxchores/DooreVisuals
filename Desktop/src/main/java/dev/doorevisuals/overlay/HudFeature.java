@@ -10,7 +10,8 @@ import dev.doorevisuals.draw.Nvg;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Sprites;
 import dev.doorevisuals.draw.Theme;
-import dev.doorevisuals.tools.FtHelperFeature;
+import dev.doorevisuals.server.FunHelperFeature;
+import dev.doorevisuals.tools.CooldownsFeature;
 import dev.doorevisuals.tools.ThemeFeature;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -661,10 +662,17 @@ public final class HudFeature extends Feature {
                 try {
                     g.getMatrices().translate(afloat1[0], afloat1[1]);
                     g.getMatrices().scale(hudslot1.scale(), hudslot1.scale());
-                    g.drawItem(new ItemStack(Items.ENDER_PEARL), 6, 3);
-                    g.drawItem(new ItemStack(Items.GOLDEN_APPLE), 28, 3);
-                    g.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING), 50, 3);
-                    g.drawItem(new ItemStack(Items.SHIELD), 72, 3);
+                    List<CooldownsFeature.Cd> list = CooldownsFeature.active();
+                    if (list.isEmpty()) {
+                        g.drawItem(new ItemStack(Items.ENDER_PEARL), 6, 3);
+                        g.drawItem(new ItemStack(Items.GOLDEN_APPLE), 28, 3);
+                        g.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING), 50, 3);
+                        g.drawItem(new ItemStack(Items.SHIELD), 72, 3);
+                    } else {
+                        for (int k = 0; k < list.size(); k++) {
+                            g.drawItem(list.get(k).stack(), 6 + k * 22, 3);
+                        }
+                    }
                 } finally {
                     g.getMatrices().popMatrix();
                 }
@@ -929,7 +937,7 @@ public final class HudFeature extends Feature {
                     l++;
                     boolean flag2 = armorLow(itemstack);
                     if (flag2) {
-                        float f3 = 0.55F + 0.45F * (float)Math.sin(System.currentTimeMillis() / 180.0);
+                        float f3 = 0.55F + 0.45F * (float)Math.sin(Anim.timeSec() * 5.5555F);
                         Paint.box(g, f2 - 1.0F, 2.0F, 20.0F, 20.0F, Theme.alpha(16730698, (int)(90.0F + 80.0F * f3)), 5.0F);
                     }
 
@@ -997,7 +1005,9 @@ public final class HudFeature extends Feature {
 
     private void paintCooldowns(DrawContext g, MinecraftClient mc, boolean editor) {
         HudSlot hudslot = this.slots.get("cooldowns");
-        float f = 96.0F;
+        List<CooldownsFeature.Cd> list = CooldownsFeature.active();
+        int i = Math.max(1, editor && list.isEmpty() ? 4 : list.size());
+        float f = Math.max(96.0F, 10.0F + i * 22.0F);
         float f1 = 24.0F;
         hudslot.size(f, f1);
         float[] afloat = this.slotPos(hudslot, f, f1, mc);
@@ -1005,20 +1015,18 @@ public final class HudFeature extends Feature {
         Nvg.move(afloat[0], afloat[1]);
         Nvg.scale(hudslot.scale(), hudslot.scale());
         this.hudPlate(g, f, f1, this.hudAccent());
-        Item[] aitem = new Item[]{Items.ENDER_PEARL, Items.GOLDEN_APPLE, Items.TOTEM_OF_UNDYING, Items.SHIELD};
 
-        for (int i = 0; i < aitem.length; i++) {
-            float f2 = 6 + i * 22;
+        for (int j = 0; j < i; j++) {
+            float f2 = 6 + j * 22;
             Paint.box(g, f2, 3.0F, 18.0F, 18.0F, Theme.alpha(0, 80), 4.0F);
-            float f3 = 0.0F;
+            if (j < list.size()) {
+                CooldownsFeature.Cd cooldownsfeature$cd = list.get(j);
+                float f3 = cooldownsfeature$cd.progress();
+                if (f3 > 0.02F) {
+                    Paint.bar(g, f2 + 1.0F, 18.0F, 16.0F, 2.2F, 1.0F - f3, Theme.ACCENT_HOT);
+                }
 
-            try {
-                f3 = mc.player.getItemCooldownManager().getCooldownProgress(aitem[i].getDefaultStack(), 0.0F);
-            } catch (Throwable throwable) {
-            }
-
-            if (f3 > 0.02F) {
-                Paint.bar(g, f2 + 1.0F, 18.0F, 16.0F, 2.2F, 1.0F - f3, Theme.ACCENT_HOT);
+                Paint.textC(g, String.format("%.0f", cooldownsfeature$cd.seconds()), f2 + 9.0F, 8.0F, Theme.TEXT, 5.4F);
             }
         }
 
@@ -1057,7 +1065,7 @@ public final class HudFeature extends Feature {
         if ((Boolean)this.island.get()) {
             return false;
         } else {
-            String s = FtHelperFeature.trapText();
+            String s = FunHelperFeature.trapText();
             return this.editingLayout() || s != null && !s.isBlank();
         }
     }
@@ -1065,7 +1073,7 @@ public final class HudFeature extends Feature {
     private void paintTrap(DrawContext g, MinecraftClient mc, boolean editor) {
         HudSlot hudslot = this.slots.get("trap");
         if (hudslot != null) {
-            String s = FtHelperFeature.trapText();
+            String s = FunHelperFeature.trapText();
             if ((s == null || s.isBlank()) && !editor) {
                 hudslot.size(0.0F, 0.0F);
             } else {

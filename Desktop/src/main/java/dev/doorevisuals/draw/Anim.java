@@ -1,6 +1,7 @@
 package dev.doorevisuals.draw;
 
 public final class Anim {
+    private static final long EPOCH_NANOS = System.nanoTime();
     private static volatile Anim.Motion motion = Anim.Motion.NORMAL;
     private float value;
     private float velocity;
@@ -108,8 +109,12 @@ public final class Anim {
         }
     }
 
+    /**
+     * Seconds since class init. Measured from a fixed origin so the result stays inside the range
+     * where float still has sub-millisecond resolution; wall-clock millis are far too large for that.
+     */
     public static float timeSec() {
-        return (float)System.currentTimeMillis() * 0.001F;
+        return (float)((System.nanoTime() - EPOCH_NANOS) * 1.0E-9);
     }
 
     public static float easeOpen(float t) {

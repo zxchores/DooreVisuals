@@ -11,7 +11,7 @@ public final class ChangelogSeen {
     }
 
     public static boolean hasNew() {
-        return !"3.30.2".equals(lastSeen());
+        return !"3.32.0".equals(lastSeen());
     }
 
     public static String lastSeen() {
@@ -37,7 +37,7 @@ public final class ChangelogSeen {
                 jsonobject = JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
             }
 
-            jsonobject.addProperty("last_changelog", "3.30.2");
+            jsonobject.addProperty("last_changelog", "3.32.0");
             Files.writeString(path, jsonobject.toString(), StandardCharsets.UTF_8);
         } catch (Exception exception) {
         }

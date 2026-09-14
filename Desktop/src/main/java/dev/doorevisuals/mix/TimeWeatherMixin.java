@@ -19,7 +19,7 @@ public class TimeWeatherMixin {
     @Inject(method = "isRaining", at = @At("HEAD"), cancellable = true)
     private void doore$rain(CallbackInfoReturnable<Boolean> cir) {
         String s = TimeWeatherFeature.weatherMode();
-        if ("clear".equals(s)) {
+        if ("clear".equals(s) || "snow".equals(s) || "fog".equals(s)) {
             cir.setReturnValue(false);
         } else if ("rain".equals(s) || "thunder".equals(s)) {
             cir.setReturnValue(true);
@@ -31,7 +31,7 @@ public class TimeWeatherMixin {
         String s = TimeWeatherFeature.weatherMode();
         if ("thunder".equals(s)) {
             cir.setReturnValue(true);
-        } else if ("clear".equals(s) || "rain".equals(s)) {
+        } else if ("clear".equals(s) || "rain".equals(s) || "snow".equals(s) || "fog".equals(s)) {
             cir.setReturnValue(false);
         }
     }

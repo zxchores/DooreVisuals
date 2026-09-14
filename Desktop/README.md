@@ -1,6 +1,6 @@
 # DooreVisuals (Desktop)
 
-Fabric-клиент визуалов для Minecraft **1.21.11**. Исходники восстановлены из релиза `v3.30.2`.
+Fabric-клиент визуалов для Minecraft **1.21.11**. Исходники восстановлены из релиза `v3.32.0`.
 
 ## Сборка
 
@@ -11,6 +11,6 @@ cd Desktop
 ./gradlew build
 ```
 
-Готовый мод: `Desktop/build/libs/doorevisuals-3.30.2.jar`.
+Готовый мод: `Desktop/build/libs/doorevisuals-3.32.0.jar`.
 
 Версия клиента — `DooreClient.VERSION` и `gradle.properties` (`mod_version`).

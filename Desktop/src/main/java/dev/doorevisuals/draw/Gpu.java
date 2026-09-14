@@ -33,6 +33,8 @@ public final class Gpu {
             .withVertexFormat(VertexFormats.POSITION_TEXTURE_COLOR, DrawMode.QUADS)
             .build()
     );
+    private static final Identifier SKY = id("core/atmo_sky");
+    public static final RenderPipeline SKY_PIPE = quad("pipeline/v3_sky", SKY, BlendFunction.TRANSLUCENT);
 
     private Gpu() {
     }
@@ -45,6 +47,7 @@ public final class Gpu {
         SCAN_PIPE.getClass();
         GHOST_PIPE.getClass();
         ORB_PIPE.getClass();
+        SKY_PIPE.getClass();
     }
 
     private static RenderPipeline quad(String loc, Identifier shader, BlendFunction blend) {

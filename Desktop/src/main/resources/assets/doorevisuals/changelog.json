@@ -1,6 +1,24 @@
 {
   "entries": [
     {
+      "version": "3.32.0",
+      "title": "Title menu + Atmosphere",
+      "bullets": [
+        "Новое главное меню: кастомные кнопки, без чёрного экрана",
+        "Atmosphere: шейдер неба, цвет тумана, звёзды/снег, без quality/chunk fade"
+      ]
+    },
+    {
+      "version": "3.31.0",
+      "title": "FunTime helpers + Models",
+      "bullets": [
+        "AhHelper, AutoInvest, Fun Helper, Events, Inventory Manager",
+        "Command Fix, PvP Save, Cooldowns, Pickup Logger, Bore Helper, Lock Slot, Item Swap",
+        "Цвет брони друзей; кастомные модели игрока из папки models",
+        "Убраны FT Helper, HW Helper и AutoSwap"
+      ]
+    },
+    {
       "version": "3.30.2",
       "title": "Hotfix: theme glint",
       "bullets": [

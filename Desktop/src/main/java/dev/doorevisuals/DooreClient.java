@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public final class DooreClient implements ClientModInitializer {
     public static final String ID = "doorevisuals";
-    public static final String VERSION = "3.30.2";
+    public static final String VERSION = "3.32.0";
     private static final Logger LOG = LoggerFactory.getLogger("DooreVisuals");
     private static final Category KEYS = Category.create(Identifier.of("doorevisuals", "main"));
 
@@ -78,6 +78,6 @@ public final class DooreClient implements ClientModInitializer {
             thread.start();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register((ClientStopping)c -> App.shutdown());
-        LOG.info("DooreVisuals {} cold-start complete", "3.30.2");
+        LOG.info("DooreVisuals {} cold-start complete", "3.32.0");
     }
 }

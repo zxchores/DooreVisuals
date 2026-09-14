@@ -6,7 +6,8 @@ import dev.doorevisuals.draw.Nvg;
 import dev.doorevisuals.tools.AspectFeature;
 import dev.doorevisuals.tools.ContainerChrome;
 import dev.doorevisuals.tools.CrosshairFeature;
-import dev.doorevisuals.tools.FtHelperFeature;
+import dev.doorevisuals.server.EventsFeature;
+import dev.doorevisuals.tools.CooldownsFeature;
 import dev.doorevisuals.tools.GpsFeature;
 import dev.doorevisuals.ui.PanelScreen;
 import dev.doorevisuals.world.TargetEspFeature;
@@ -68,11 +69,11 @@ public final class OverlayPipe {
                                 LOG.error("Hotbar NVG", throwable1);
                             }
                         });
-                        App.features().find(FtHelperFeature.class).filter(Feature::on).ifPresent(ft -> {
+                        App.features().find(EventsFeature.class).filter(Feature::on).ifPresent(ev -> {
                             try {
-                                ft.paintHud(g);
+                                ev.paintHud(g);
                             } catch (Throwable throwable1) {
-                                LOG.error("FT Helper", throwable1);
+                                LOG.error("Events", throwable1);
                             }
                         });
                     });
@@ -90,6 +91,11 @@ public final class OverlayPipe {
                             LOG.error("Hotbar items", throwable1);
                         }
                     });
+                    try {
+                        CooldownsFeature.paintHotbar(g);
+                    } catch (Throwable throwable1) {
+                        LOG.error("Cooldowns hotbar", throwable1);
+                    }
                 } catch (Throwable throwable) {
                     LOG.error("Overlay frame", throwable);
                 }
