@@ -1,7 +1,6 @@
 package dev.doorevisuals.mix;
 
 import dev.doorevisuals.tools.NoRenderFeature;
-import dev.doorevisuals.world.AtmosphereFeature;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WeatherRendering;
 import net.minecraft.client.render.state.WeatherRenderState;
@@ -16,10 +15,6 @@ public class WeatherFxMixin {
     @Inject(method = "renderPrecipitation", at = @At("HEAD"), cancellable = true)
     private void doore$weather(VertexConsumerProvider buffers, Vec3d cam, WeatherRenderState state, CallbackInfo ci) {
         if (NoRenderFeature.weather()) {
-            ci.cancel();
-        }
-
-        if (AtmosphereFeature.hideVanillaRain()) {
             ci.cancel();
         }
     }

@@ -5,6 +5,7 @@ import dev.doorevisuals.core.Category;
 import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
 import dev.doorevisuals.core.Tick;
+import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Mesh;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.draw.Types;
@@ -51,11 +52,12 @@ public final class AtmosphereFeature extends Feature implements Tick {
     private final Opt.Num fogEnd = this.opt(new Opt.Num("fog_end", "Дальность тумана", 0.78, 0.25, 1.5, 0.05));
     private final Opt.Flag clouds = this.opt(new Opt.Flag("clouds", "Облака", true));
     private final Opt.Flag aurora = this.opt(new Opt.Flag("aurora", "Аврора", false));
-    private final Opt.Flag stars = this.opt(new Opt.Flag("stars", "Звёзды", true));
-    private final Opt.Flag weatherFx = this.opt(new Opt.Flag("rain_fx", "Погода FX", true));
+    private final Opt.Flag ownCelestial = this.opt(new Opt.Flag("own_celestial", "\u0421\u0432\u043e\u0438 \u0441\u0432\u0435\u0442\u0438\u043b\u0430", false));
+    private final Opt.Flag weatherFx = this.opt(new Opt.Flag("rain_fx", "\u0412\u0441\u043f\u044b\u0448\u043a\u0438 \u0433\u0440\u043e\u0437\u044b", true));
     private final Opt.Flag vanillaSky = this.opt(new Opt.Flag("vanilla_sky", "Ванильное небо", false));
     private String lastPreset = "";
     private AtmosphereFeature.Sky painted;
+    private float paintedAt;
 
     public AtmosphereFeature() {
         super("atmosphere", "Atmosphere", "Небо, туман, время и погода", Category.WORLD, false);
@@ -76,10 +78,10 @@ public final class AtmosphereFeature extends Feature implements Tick {
             .orElse(false);
     }
 
-    public static boolean hideVanillaRain() {
+    public static boolean hideVanillaCelestial() {
         return App.features()
             .find(AtmosphereFeature.class)
-            .map(f -> f.on() && overworld() && (Boolean)f.weatherFx.get() && f.replacesPrecip())
+            .map(f -> f.on() && overworld() && !(Boolean)f.vanillaSky.get() && (Boolean)f.ownCelestial.get())
             .orElse(false);
     }
 
@@ -125,12 +127,11 @@ public final class AtmosphereFeature extends Feature implements Tick {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             ClientPlayerEntity clientplayerentity = minecraftclient.player;
             if (clientplayerentity != null && minecraftclient.world != null) {
-                Vec3d vec3d = clientplayerentity.getCameraPosVec(tickDelta);
+                Vec3d vec3d = camPos(minecraftclient);
                 AtmosphereFeature.Sky atmospherefeature$sky = this.liveSky();
-                this.drawDome(ctx, vec3d, atmospherefeature$sky);
-                this.drawCelestial(ctx, vec3d, atmospherefeature$sky);
-                if ((Boolean)this.stars.get() && atmospherefeature$sky.showMoon) {
-                    this.drawStars(ctx, vec3d, atmospherefeature$sky);
+                this.drawDome(ctx, minecraftclient, vec3d, atmospherefeature$sky);
+                if ((Boolean)this.ownCelestial.get()) {
+                    this.drawCelestial(ctx, vec3d, atmospherefeature$sky);
                 }
             }
         }
@@ -141,7 +142,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             ClientPlayerEntity clientplayerentity = minecraftclient.player;
             if (clientplayerentity != null && minecraftclient.world != null) {
-                Vec3d vec3d = clientplayerentity.getCameraPosVec(tickDelta);
+                Vec3d vec3d = camPos(minecraftclient);
                 AtmosphereFeature.Sky atmospherefeature$sky = this.liveSky();
                 if (!(Boolean)this.vanillaSky.get() && (Boolean)this.clouds.get()) {
                     this.drawClouds(ctx, vec3d, atmospherefeature$sky);
@@ -152,7 +153,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 }
 
                 if ((Boolean)this.weatherFx.get()) {
-                    this.drawWeather(ctx, minecraftclient.world, vec3d, atmospherefeature$sky);
+                    this.drawLightning(ctx, minecraftclient.world, vec3d);
                 }
             }
         }
@@ -221,16 +222,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
         };
     }
 
-    private boolean replacesPrecip() {
-        String s = this.mixinWeather();
-        if ("rain".equals(s) || "thunder".equals(s) || "snow".equals(s)) {
-            return true;
-        } else {
-            MinecraftClient minecraftclient = MinecraftClient.getInstance();
-            return minecraftclient.world != null && minecraftclient.world.isRaining();
-        }
-    }
-
     private void applyPreset(String label) {
         switch (label) {
             case "Ночь":
@@ -245,7 +236,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.18);
                 this.fogEnd.set(0.58);
                 this.aurora.set(true);
-                this.stars.set(true);
                 this.clouds.set(true);
                 break;
             case "Закат":
@@ -260,7 +250,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.2);
                 this.fogEnd.set(0.7);
                 this.aurora.set(false);
-                this.stars.set(false);
                 this.clouds.set(true);
                 break;
             case "Сакура":
@@ -275,7 +264,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.28);
                 this.fogEnd.set(0.85);
                 this.aurora.set(false);
-                this.stars.set(false);
                 this.clouds.set(true);
                 break;
             case "Холод":
@@ -290,7 +278,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.16);
                 this.fogEnd.set(0.62);
                 this.aurora.set(true);
-                this.stars.set(true);
                 this.clouds.set(true);
                 break;
             case "Кибер":
@@ -305,7 +292,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.14);
                 this.fogEnd.set(0.55);
                 this.aurora.set(true);
-                this.stars.set(true);
                 this.clouds.set(true);
                 break;
             case "Свой":
@@ -322,7 +308,6 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 this.fogStart.set(0.28);
                 this.fogEnd.set(0.92);
                 this.aurora.set(false);
-                this.stars.set(false);
                 this.clouds.set(true);
         }
     }
@@ -332,8 +317,12 @@ public final class AtmosphereFeature extends Feature implements Tick {
         AtmosphereFeature.Sky atmospherefeature$sky = this.skyOf((String)this.preset.get(), i);
         if (this.painted == null) {
             this.painted = atmospherefeature$sky;
+            this.paintedAt = Anim.timeSec();
         } else {
-            this.painted = this.painted.lerp(atmospherefeature$sky, 0.14F);
+            float f = Anim.timeSec();
+            float f1 = Math.min(0.25F, Math.max(0.0F, f - this.paintedAt));
+            this.paintedAt = f;
+            this.painted = this.painted.lerp(atmospherefeature$sky, 1.0F - (float)Math.exp(-9.0F * f1));
         }
 
         return this.painted;
@@ -342,77 +331,87 @@ public final class AtmosphereFeature extends Feature implements Tick {
     private AtmosphereFeature.Sky skyOf(String label, int tint) {
         return switch (label) {
             case "Ночь" -> new AtmosphereFeature.Sky(
-                -16315620, -15195064, -14869218, -5944, -1511169, Theme.tintMul(-7692072, tint, 0.2F), -12779622, -8758017, false, true
+                -16315620, -15195064, -14869218, -5944, -1511169, Theme.tintMul(-7692072, tint, 0.2F), -12779622, -8758017
             );
             case "Закат" -> new AtmosphereFeature.Sky(
-                -15068104, -38342, -11403384, -16264, -7992, Theme.tintMul(-12112, tint, 0.35F), -30134, -4236839, true, false
+                -15068104, -38342, -11403384, -16264, -7992, Theme.tintMul(-12112, tint, 0.35F), -30134, -4236839
             );
             case "Сакура" -> new AtmosphereFeature.Sky(
-                -6368001, -15660, -4924197, -3368, -5904, Theme.tintMul(-7958, tint, 0.4F), -18491, -1533228, true, false
+                -6368001, -15660, -4924197, -3368, -5904, Theme.tintMul(-7958, tint, 0.4F), -18491, -1533228
             );
             case "Холод" -> new AtmosphereFeature.Sky(
-                -9520897, -1510145, -8740664, -2336, -2560769, Theme.tintMul(-853249, tint, 0.25F), -8462081, -4659969, true, true
+                -9520897, -1510145, -8740664, -2336, -2560769, Theme.tintMul(-853249, tint, 0.25F), -8462081, -4659969
             );
             case "Кибер" -> new AtmosphereFeature.Sky(
-                -16576488, -16238544, -16772848, -14622528, -50476, Theme.tintMul(-15054264, tint, 0.35F), -14622528, -50476, false, true
+                -16576488, -16238544, -16772848, -14622528, -50476, Theme.tintMul(-15054264, tint, 0.35F), -14622528, -50476
             );
             default -> new AtmosphereFeature.Sky(
-                -11884328, -3610369, -15069152, -3896, -1510145, Theme.tintMul(-722177, tint, 0.22F), -12533600, -4236839, true, false
+                -11884328, -3610369, -15069152, -3896, -1510145, Theme.tintMul(-722177, tint, 0.22F), -12533600, -4236839
             );
         };
     }
 
-    private void drawDome(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
+    private static Vec3d camPos(MinecraftClient mc) {
+        return mc.gameRenderer.getCamera().getCameraPos();
+    }
+
+    /**
+     * Sky shell has to sit beyond the furthest terrain so the depth test lets terrain win, yet well
+     * inside the far plane so the shell itself is not clipped. The far plane is four times the view
+     * distance, and the furthest terrain corner is about 1.42 times it, so double is a safe middle.
+     */
+    private static double domeRadius(MinecraftClient mc) {
+        int i = Math.max(2, (Integer)mc.options.getViewDistance().getValue());
+        return i * 16.0 * 2.0;
+    }
+
+    private void drawDome(WorldRenderContext ctx, MinecraftClient mc, Vec3d cam, AtmosphereFeature.Sky sky) {
         int i = VisualQuality.segs(20);
-        Mesh.skyDome(ctx, cam.x, cam.y, cam.z, 108.0, i, 8, Mesh.alpha(sky.zenith, 0.92F), Mesh.alpha(sky.horizon, 0.88F), Mesh.alpha(sky.nadir, 0.9F), Types.sky());
+        Mesh.skyDome(
+            ctx,
+            cam.x,
+            cam.y,
+            cam.z,
+            domeRadius(mc),
+            i,
+            8,
+            Mesh.alpha(sky.zenith, 0.92F),
+            Mesh.alpha(sky.horizon, 0.88F),
+            Mesh.alpha(sky.nadir, 0.9F),
+            Types.sky()
+        );
     }
 
     private void drawCelestial(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
+        MinecraftClient minecraftclient = MinecraftClient.getInstance();
+        double d0 = domeRadius(minecraftclient) * 0.86;
         float f = dayPhase();
-        double d0 = Math.cos((f - 0.25F) * Math.PI * 2.0);
-        double d1 = f * Math.PI * 2.0;
-        if (sky.showSun && d0 > -0.12) {
-            double d2 = 96.0;
-            double d3 = cam.x + Math.cos(d1) * d2;
-            double d4 = cam.y + d0 * 86.0;
-            double d5 = cam.z + Math.sin(d1) * d2 * 0.42;
-            float f1 = 0.4F + 0.5F * (float)Math.max(0.0, d0);
-            Mesh.orb(ctx, d3, d4, d5, 22.0F, Mesh.alpha(sky.sun, f1 * 0.22F));
-            Mesh.orb(ctx, d3, d4, d5, 11.0F, Mesh.alpha(sky.sun, f1 * 0.55F));
-            Mesh.orb(ctx, d3, d4, d5, 5.4F, Mesh.alpha(-2336, f1));
+        double d1 = Math.cos((f - 0.25F) * Math.PI * 2.0);
+        double d2 = f * Math.PI * 2.0;
+        float f1 = (float)(d0 / 108.0);
+        if (d1 > -0.12) {
+            double d3 = cam.x + Math.cos(d2) * d0;
+            double d4 = cam.y + d1 * d0 * 0.9;
+            double d5 = cam.z + Math.sin(d2) * d0 * 0.42;
+            float f2 = 0.4F + 0.5F * (float)Math.max(0.0, d1);
+            Mesh.orb(ctx, d3, d4, d5, 22.0F * f1, Mesh.alpha(sky.sun, f2 * 0.22F));
+            Mesh.orb(ctx, d3, d4, d5, 11.0F * f1, Mesh.alpha(sky.sun, f2 * 0.55F));
+            Mesh.orb(ctx, d3, d4, d5, 5.4F * f1, Mesh.alpha(-2336, f2));
         }
 
-        if (sky.showMoon && d0 < 0.35) {
-            double d6 = d1 + Math.PI;
-            double d7 = cam.x + Math.cos(d6) * 90.0;
-            double d8 = cam.y - d0 * 80.0;
-            double d9 = cam.z + Math.sin(d6) * 90.0 * 0.4;
-            float f2 = 0.45F + 0.4F * (float)Math.max(0.0, -d0);
-            Mesh.orb(ctx, d7, d8, d9, 12.0F, Mesh.alpha(sky.moon, f2 * 0.2F));
-            Mesh.orb(ctx, d7, d8, d9, 4.8F, Mesh.alpha(-722689, f2 * 0.9F));
-        }
-    }
-
-    private void drawStars(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
-        float f = 0.35F + 0.45F * (float)Math.max(0.0, -Math.cos((dayPhase() - 0.25F) * Math.PI * 2.0));
-        int i = Math.max(18, Math.round(36.0F * VisualQuality.particleMul()));
-
-        for (int j = 0; j < i; j++) {
-            float f1 = hash(j, 3);
-            float f2 = hash(j, 17);
-            double d0 = f1 * Math.PI * 2.0;
-            double d1 = 0.18 + f2 * 1.15;
-            double d2 = 92.0;
-            double d3 = cam.x + Math.cos(d0) * Math.sin(d1) * d2;
-            double d4 = cam.y + Math.cos(d1) * d2;
-            double d5 = cam.z + Math.sin(d0) * Math.sin(d1) * d2;
-            float f3 = 0.35F + 0.65F * hash(j, 41);
-            Mesh.orb(ctx, d3, d4, d5, 0.55F + hash(j, 7) * 0.45F, Mesh.alpha(-1, f * f3 * 0.7F));
+        if (d1 < 0.35) {
+            double d6 = d2 + Math.PI;
+            double d7 = cam.x + Math.cos(d6) * d0;
+            double d8 = cam.y - d1 * d0 * 0.84;
+            double d9 = cam.z + Math.sin(d6) * d0 * 0.4;
+            float f3 = 0.45F + 0.4F * (float)Math.max(0.0, -d1);
+            Mesh.orb(ctx, d7, d8, d9, 12.0F * f1, Mesh.alpha(sky.moon, f3 * 0.2F));
+            Mesh.orb(ctx, d7, d8, d9, 4.8F * f1, Mesh.alpha(-722689, f3 * 0.9F));
         }
     }
 
     private void drawClouds(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
-        float f = (float)System.currentTimeMillis() * 1.2E-5F;
+        float f = Anim.timeSec() * 0.012F;
         int i = Math.max(6, Math.round(10.0F * VisualQuality.particleMul()));
 
         for (int j = 0; j < i; j++) {
@@ -431,7 +430,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
     }
 
     private void drawAurora(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
-        float f = (float)System.currentTimeMillis() * 5.5E-4F;
+        float f = Anim.timeSec() * 0.55F;
         int i = Math.max(2, Math.round(3.0F * VisualQuality.particleMul()));
 
         for (int j = 0; j < i; j++) {
@@ -452,57 +451,11 @@ public final class AtmosphereFeature extends Feature implements Tick {
         }
     }
 
-    private void drawWeather(WorldRenderContext ctx, World level, Vec3d cam, AtmosphereFeature.Sky sky) {
-        String s = this.mixinWeather();
-        boolean flag = "snow".equals(s);
-        boolean flag1 = "thunder".equals(s) || level.isThundering();
-        boolean flag2 = "rain".equals(s) || "thunder".equals(s) || level.isRaining();
-        if (flag) {
-            this.drawSnow(ctx, cam, sky);
-        } else if (flag2) {
-            this.drawRain(ctx, cam, sky);
-        }
-
-        if (flag1) {
-            float f = (float)((System.currentTimeMillis() / 90L) % 17L);
+    private void drawLightning(WorldRenderContext ctx, World level, Vec3d cam) {
+        if ("thunder".equals(this.mixinWeather()) || level.isThundering()) {
+            float f = Anim.timeSec() * 11.11F % 17.0F;
             if (f < 2.0F) {
                 Mesh.orb(ctx, cam.x, cam.y + 40.0, cam.z, 70.0F, Mesh.alpha(-1, 0.08F * (2.0F - f)));
-            }
-        }
-    }
-
-    private void drawRain(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
-        int i = Math.max(22, Math.round(40.0F * VisualQuality.particleMul()));
-        float f = (float)System.currentTimeMillis() * 0.00115F;
-        int j = Theme.tintMul(-4664065, sky.horizon, 0.12F);
-
-        for (int k = 0; k < i; k++) {
-            if (VisualQuality.takeParticle()) {
-                float f1 = hash(k, 3) - 0.5F;
-                float f2 = hash(k, 11) - 0.5F;
-                float f3 = (hash(k, 29) + f * (0.55F + hash(k, 7) * 0.45F)) % 1.0F;
-                double d0 = cam.x + f1 * 20.0F;
-                double d1 = cam.z + f2 * 20.0F;
-                double d2 = cam.y + 8.0 - f3 * 14.0;
-                float f4 = 0.026F + hash(k, 41) * 0.016F;
-                Mesh.capsule(ctx, d0, d2, d1, f4, 0.2F + hash(k, 19) * 0.1F, 8, 3, Mesh.alpha(j, 0.5F), Types.fill());
-            }
-        }
-    }
-
-    private void drawSnow(WorldRenderContext ctx, Vec3d cam, AtmosphereFeature.Sky sky) {
-        int i = Math.max(20, Math.round(34.0F * VisualQuality.particleMul()));
-        float f = (float)System.currentTimeMillis() * 0.00055F;
-
-        for (int j = 0; j < i; j++) {
-            if (VisualQuality.takeParticle()) {
-                float f1 = hash(j, 5) - 0.5F;
-                float f2 = hash(j, 13) - 0.5F;
-                float f3 = (hash(j, 31) + f * (0.25F + hash(j, 8) * 0.2F)) % 1.0F;
-                double d0 = cam.x + f1 * 18.0F + Math.sin(f * 4.0F + j) * 0.8;
-                double d1 = cam.z + f2 * 18.0F + Math.cos(f * 3.2F + j) * 0.7;
-                double d2 = cam.y + 7.5 - f3 * 12.0;
-                Mesh.orb(ctx, d0, d2, d1, 0.08F + hash(j, 19) * 0.06F, Mesh.alpha(-1, 0.55F));
             }
         }
     }
@@ -517,7 +470,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
         return (j & 2147483647) / 2.1474836E9F;
     }
 
-    private record Sky(int zenith, int horizon, int nadir, int sun, int moon, int cloud, int auroraA, int auroraB, boolean showSun, boolean showMoon) {
+    private record Sky(int zenith, int horizon, int nadir, int sun, int moon, int cloud, int auroraA, int auroraB) {
         AtmosphereFeature.Sky lerp(AtmosphereFeature.Sky to, float t) {
             return new AtmosphereFeature.Sky(
                 Theme.lerp(this.zenith, to.zenith, t),
@@ -527,9 +480,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
                 Theme.lerp(this.moon, to.moon, t),
                 Theme.lerp(this.cloud, to.cloud, t),
                 Theme.lerp(this.auroraA, to.auroraA, t),
-                Theme.lerp(this.auroraB, to.auroraB, t),
-                to.showSun,
-                to.showMoon
+                Theme.lerp(this.auroraB, to.auroraB, t)
             );
         }
     }

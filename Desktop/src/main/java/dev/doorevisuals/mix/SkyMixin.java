@@ -29,7 +29,7 @@ public class SkyMixin {
     private void doore$celestial(
         MatrixStack pose, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float alpha, float starBrightness, CallbackInfo ci
     ) {
-        if (AtmosphereFeature.hideVanillaSky()) {
+        if (AtmosphereFeature.hideVanillaCelestial()) {
             ci.cancel();
         }
     }
