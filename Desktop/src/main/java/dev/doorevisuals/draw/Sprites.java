@@ -16,6 +16,9 @@ public final class Sprites {
     public static final Identifier LOGO = Identifier.of("doorevisuals", "textures/gui/logo_round.png");
     public static final Identifier CLIENT_ICON = Identifier.of("doorevisuals", "textures/gui/client_icon.png");
     public static final Identifier MENU_BG = Identifier.of("doorevisuals", "textures/gui/menu_bg.png");
+    public static final Identifier ICON_PLAYER = Identifier.of("doorevisuals", "textures/gui/icon_player.png");
+    public static final Identifier ICON_FPS = Identifier.of("doorevisuals", "textures/gui/icon_fps.png");
+    public static final Identifier ICON_PING = Identifier.of("doorevisuals", "textures/gui/icon_ping.png");
 
     private Sprites() {
     }
