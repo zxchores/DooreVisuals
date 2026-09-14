@@ -1,7 +1,7 @@
 package dev.doorevisuals.ui;
 
 import dev.doorevisuals.App;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudFeature;
@@ -61,7 +61,7 @@ public final class ConfigApplyScreen extends Screen {
         this.mx = mouseX;
         this.my = mouseY;
         super.render(g, mouseX, mouseY, partialTick);
-        Nvg.run(g, () -> this.paintCard(g));
+        Ui.frame(g, () -> this.paintCard(g));
     }
 
     private void paintCard(DrawContext g) {

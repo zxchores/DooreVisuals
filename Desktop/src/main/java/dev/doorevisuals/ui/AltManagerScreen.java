@@ -1,7 +1,7 @@
 package dev.doorevisuals.ui;
 
 import dev.doorevisuals.data.AltsStore;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.session.SessionSwitch;
@@ -65,7 +65,7 @@ public final class AltManagerScreen extends Screen {
         float f1 = Math.min(280, this.height - 48);
         float f2 = (this.width - f) / 2.0F;
         float f3 = (this.height - f1) / 2.0F;
-        Nvg.run(g, () -> this.paintUi(g, f2, f3, f, f1));
+        Ui.frame(g, () -> this.paintUi(g, f2, f3, f, f1));
         float f4 = f3 + 42.0F;
         float f5 = f1 - 118.0F;
         List<AltsStore.Alt> list = AltsStore.all();

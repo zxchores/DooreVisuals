@@ -5,6 +5,7 @@ import dev.doorevisuals.core.Category;
 import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import net.minecraft.client.MinecraftClient;
@@ -34,7 +35,7 @@ public final class CrosshairFeature extends Feature {
             float f3 = this.thick.f();
             int i = Theme.HUD;
             if (Nvg.frame()) {
-                Nvg.push();
+                Ui.push();
                 if ((Boolean)this.glow.get()) {
                     Nvg.circle(f, f1, f2 + f3 * 3.4F, Theme.alpha(i, 28));
                     Nvg.circle(f, f1, f2 + f3 * 1.8F, Theme.alpha(i, 48));
@@ -42,7 +43,7 @@ public final class CrosshairFeature extends Feature {
 
                 Nvg.ring(f - f2, f1 - f2, f2 * 2.0F, f2 * 2.0F, f3 + 0.55F, Theme.alpha(i, 70), f2);
                 Nvg.ring(f - f2, f1 - f2, f2 * 2.0F, f2 * 2.0F, f3, i, f2);
-                Nvg.pop();
+                Ui.pop();
             } else {
                 Paint.outline(g, f - f2, f1 - f2, f2 * 2.0F, f2 * 2.0F, i, f2);
             }

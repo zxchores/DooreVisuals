@@ -83,29 +83,37 @@ public final class Nvg {
         }
     }
 
+    // The four shape calls below are the ones the distance field layer can take over. They keep their
+    // signatures so that every existing caller moves with them, and fall back to NanoVG whenever no
+    // batch is collecting — inside a picker drawn over its own rows, for instance.
     public static void rect(float x, float y, float w, float h, int argb, float r) {
-        if (frame() && !(w <= 0.0F) && !(h <= 0.0F)) {
+        if (Sdf.batching()) {
+            Sdf.fill(null, x, y, w, h, argb, r);
+        } else if (frame() && !(w <= 0.0F) && !(h <= 0.0F)) {
             NVG.INSTANCE.rect(x, y, w, h, c(argb), Math.max(0.0F, r));
         }
     }
 
     public static void grad(float x, float y, float w, float h, int a, int b, float r, boolean vertical) {
-        if (frame() && !(w <= 0.0F) && !(h <= 0.0F)) {
+        if (Sdf.batching()) {
+            Sdf.grad(null, x, y, w, h, a, b, r, vertical);
+        } else if (frame() && !(w <= 0.0F) && !(h <= 0.0F)) {
             NVG.INSTANCE.gradientRect(x, y, w, h, c(a), c(b), vertical ? Gradient.TOP_BOTTOM : Gradient.LEFT_RIGHT, Math.max(0.0F, r));
         }
     }
 
     public static void ring(float x, float y, float w, float h, float thick, int argb, float r) {
-        if (frame()) {
+        if (Sdf.batching()) {
+            Sdf.stroke(null, x, y, w, h, argb, r, thick);
+        } else if (frame()) {
             NVG.INSTANCE.hollowRect(x, y, w, h, thick, c(argb), Math.max(0.0F, r));
         }
     }
 
-    public static void shadow(float x, float y, float w, float h, float blur, float spread, float r) {
-    }
-
     public static void circle(float x, float y, float r, int argb) {
-        if (frame() && !(r <= 0.0F)) {
+        if (Sdf.batching()) {
+            Sdf.circle(null, x, y, r, argb);
+        } else if (frame() && !(r <= 0.0F)) {
             NVG.INSTANCE.circle(x, y, r, c(argb));
         }
     }

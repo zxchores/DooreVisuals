@@ -59,7 +59,8 @@
 		"FriendsArmorMixin",
 		"FriendsArmorMixin$Dye",
 		"PlayerModelMixin",
-		"ChatEventsMixin"
+		"ChatEventsMixin",
+		"DrawContextAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

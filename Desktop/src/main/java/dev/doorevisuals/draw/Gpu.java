@@ -3,6 +3,7 @@ package dev.doorevisuals.draw;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderPipeline.Snippet;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import net.minecraft.client.gl.RenderPipelines;
@@ -30,6 +31,8 @@ public final class Gpu {
     public static final RenderPipeline SKY_PIPE = textured("pipeline/v3_sky", SKY, BlendFunction.TRANSLUCENT);
     public static final RenderPipeline CLOUD_PIPE = textured("pipeline/v3_cloud", CLOUD, BlendFunction.TRANSLUCENT);
     public static final RenderPipeline AURORA_PIPE = textured("pipeline/v3_aurora", AURORA, BlendFunction.LIGHTNING);
+    private static final Identifier UI_RECT = id("core/ui_rect");
+    public static final RenderPipeline UI_RECT_PIPE = uiRect();
 
     private Gpu() {
     }
@@ -45,6 +48,27 @@ public final class Gpu {
         SKY_PIPE.getClass();
         CLOUD_PIPE.getClass();
         AURORA_PIPE.getClass();
+        UI_RECT_PIPE.getClass();
+    }
+
+    /**
+     * The only 2D pipeline in the client. GUI draws are ordered by the layers the vanilla render
+     * state builds rather than by depth, so the depth test goes away and the extra UV slot carries
+     * the corner radius and border width the distance field needs.
+     */
+    private static RenderPipeline uiRect() {
+        return RenderPipelines.register(
+            RenderPipeline.builder(new Snippet[]{RenderPipelines.TRANSFORMS_AND_PROJECTION_SNIPPET})
+                .withLocation(id("pipeline/v3_ui_rect"))
+                .withVertexShader(UI_RECT)
+                .withFragmentShader(UI_RECT)
+                .withBlend(BlendFunction.TRANSLUCENT)
+                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                .withDepthWrite(false)
+                .withCull(false)
+                .withVertexFormat(VertexFormats.POSITION_TEXTURE_COLOR_LIGHT, DrawMode.QUADS)
+                .build()
+        );
     }
 
     private static RenderPipeline quad(String loc, Identifier shader, BlendFunction blend) {

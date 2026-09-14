@@ -2,7 +2,7 @@ package dev.doorevisuals.ui;
 
 import dev.doorevisuals.data.Changelog;
 import dev.doorevisuals.data.ChangelogSeen;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public final class ChangelogScreen extends Screen {
         this.my = mouseY;
         this.hits.clear();
         g.fill(0, 0, this.width, this.height, -872085496);
-        Nvg.run(g, () -> this.paint(g));
+        Ui.frame(g, () -> this.paint(g));
     }
 
     private void paint(DrawContext g) {

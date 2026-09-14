@@ -10,6 +10,7 @@ import dev.doorevisuals.data.GuiLayout;
 import dev.doorevisuals.data.Profiles;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudFeature;
@@ -62,7 +63,7 @@ public final class ThemeConfigUi {
             mx = mouseX;
             my = mouseY;
             dt = frameDt;
-            Nvg.scissor(px, py, w, h);
+            Ui.scissor(px, py, w, h);
             float f = py + 10.0F * s + themeScroll;
             float f1 = 14.0F * s;
             Paint.text(g, "\u2699", px + f1, f, Theme.ACCENT_HOT, 10.0F * s);
@@ -284,7 +285,7 @@ public final class ThemeConfigUi {
             float f19 = f - (py + themeScroll);
             float f20 = Math.min(0.0F, h - f19 - 8.0F * s);
             themeScroll = Math.max(f20, Math.min(0.0F, themeScroll));
-            Nvg.unscissor();
+            Ui.unscissor();
             Paint.scrollbar(g, px + w - 6.0F * s, py + 8.0F * s, h - 16.0F * s, f19, h, themeScroll);
         }
     }
@@ -348,7 +349,7 @@ public final class ThemeConfigUi {
                     Paint.text(g, "Drop test.cfg \u0441\u044e\u0434\u0430", px + f + 10.0F * s, f1 + 14.0F * s, Theme.TEXT, 6.6F * s);
                     Paint.text(g, Folders.pretty(ClientPaths.configs()), px + f + 10.0F * s, f1 + 30.0F * s, Theme.GHOST, 5.4F * s);
                 } else {
-                    Nvg.scissor(px + f, f1, w - f * 2.0F, f5);
+                    Ui.scissor(px + f, f1, w - f * 2.0F, f5);
                     float f6 = 40.0F * s;
                     float f7 = f1 + 4.0F * s + configScroll;
                     float f8 = 8.0F * s;
@@ -380,7 +381,7 @@ public final class ThemeConfigUi {
                         f8 += f6;
                     }
 
-                    Nvg.unscissor();
+                    Ui.unscissor();
                     float f9 = Math.min(0.0F, f5 - f8 - 4.0F * s);
                     configScroll = Math.max(f9, Math.min(0.0F, configScroll));
                     Paint.scrollbar(g, px + w - f - 5.0F * s, f4 + 4.0F * s, f5 - 8.0F * s, f8, f5, configScroll);

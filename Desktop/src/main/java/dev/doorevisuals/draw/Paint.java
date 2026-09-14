@@ -12,8 +12,19 @@ public final class Paint {
     private Paint() {
     }
 
+    /**
+     * True when a shape should go to the distance field layer. That is the case inside every
+     * {@link Ui#frame} block and, outside one, whenever there is no NanoVG frame to draw into — the
+     * old fallback there was a hard edged {@code fill}, which the field beats on both counts.
+     */
+    private static boolean sdf(DrawContext g) {
+        return Sdf.ok() && (Sdf.batching() || !Nvg.frame() && g != null);
+    }
+
     public static void box(DrawContext g, float x, float y, float w, float h, int color, float r) {
-        if (Nvg.frame()) {
+        if (sdf(g)) {
+            Sdf.fill(g, x, y, w, h, color, r);
+        } else if (Nvg.frame()) {
             Nvg.rect(x, y, w, h, color, r);
         } else {
             g.fill(Math.round(x), Math.round(y), Math.round(x + w), Math.round(y + h), color);
@@ -25,7 +36,9 @@ public final class Paint {
     }
 
     public static void grad(DrawContext g, float x, float y, float w, float h, int a, int b, float r, boolean vertical) {
-        if (Nvg.frame()) {
+        if (sdf(g)) {
+            Sdf.grad(g, x, y, w, h, a, b, r, vertical);
+        } else if (Nvg.frame()) {
             Nvg.grad(x, y, w, h, a, b, r, vertical);
         } else {
             box(g, x, y, w, h, a, r);
@@ -33,7 +46,9 @@ public final class Paint {
     }
 
     public static void outline(DrawContext g, float x, float y, float w, float h, int color, float r) {
-        if (Nvg.frame()) {
+        if (sdf(g)) {
+            Sdf.stroke(g, x, y, w, h, color, r, 1.0F);
+        } else if (Nvg.frame()) {
             Nvg.ring(x, y, w, h, 1.0F, color, r);
         } else {
             int i = Math.round(x);
@@ -51,10 +66,41 @@ public final class Paint {
         outline(g, (float)x, (float)y, (float)w, (float)h, color, r);
     }
 
-    public static void shadow(float x, float y, float w, float h, float r) {
+    public static void circle(DrawContext g, float cx, float cy, float r, int color) {
+        if (sdf(g)) {
+            Sdf.circle(g, cx, cy, r, color);
+        } else {
+            Nvg.circle(cx, cy, r, color);
+        }
     }
 
+    public static void ring(DrawContext g, float cx, float cy, float r, float thickness, int color) {
+        if (sdf(g)) {
+            Sdf.ring(g, cx, cy, r, thickness, color);
+        } else {
+            Nvg.ring(cx - r, cy - r, r * 2.0F, r * 2.0F, thickness, color, r);
+        }
+    }
+
+    public static void shadow(float x, float y, float w, float h, float r) {
+        shadow(x, y, w, h, 12.0F, r);
+    }
+
+    /**
+     * A real drop shadow: the distance field rolls the alpha off over {@code blur} pixels, so one quad
+     * replaces what would otherwise be a stack of ever fainter rectangles. Without the field layer it
+     * falls back to that stack, which is still better than the empty body this used to have.
+     */
     public static void shadow(float x, float y, float w, float h, float blur, float r) {
+        float f = Math.max(1.0F, blur);
+        if (Sdf.batching()) {
+            Sdf.shadow(null, x + 1.0F, y + 2.0F, w, h, Theme.alpha(0, 130), r, f);
+        } else if (Nvg.frame()) {
+            for (int i = 4; i >= 1; i--) {
+                float f1 = f * i / 4.0F;
+                Nvg.rect(x - f1 + 1.0F, y - f1 + 2.0F, w + f1 * 2.0F, h + f1 * 2.0F, Theme.alpha(0, 12), r + f1);
+            }
+        }
     }
 
     @Deprecated
@@ -216,12 +262,9 @@ public final class Paint {
         float f1 = Math.max(h, w * f);
         grad(g, x, y + h * 0.35F, f1, h * 0.3F, Theme.ACCENT, Theme.ACCENT_HOT, h * 0.2F, true);
         float f2 = x + w * f;
-        if (Nvg.frame()) {
-            Nvg.circle(f2, y + h * 0.5F, h * 0.7F, Theme.alpha(Theme.ACCENT, 50));
-        }
-
-        Nvg.circle(f2, y + h * 0.5F, h * 0.55F, Theme.ACCENT);
-        Nvg.circle(f2, y + h * 0.5F, h * 0.32F, Theme.TEXT);
+        circle(g, f2, y + h * 0.5F, h * 0.7F, Theme.alpha(Theme.ACCENT, 50));
+        circle(g, f2, y + h * 0.5F, h * 0.55F, Theme.ACCENT);
+        circle(g, f2, y + h * 0.5F, h * 0.32F, Theme.TEXT);
     }
 
     public static void panel(DrawContext g, int x, int y, int w, int h) {
@@ -289,10 +332,12 @@ public final class Paint {
     }
 
     public static void heart(DrawContext g, float x, float y, float s, int color) {
-        if (Nvg.frame()) {
+        if (!sdf(g) && !Nvg.frame()) {
+            text(g, "\u2665", x, y - 1.0F, color, s * 0.95F);
+        } else {
             float f = Math.max(1.6F, s * 0.26F);
-            Nvg.circle(x + s * 0.3F, y + s * 0.3F, f, color);
-            Nvg.circle(x + s * 0.7F, y + s * 0.3F, f, color);
+            circle(g, x + s * 0.3F, y + s * 0.3F, f, color);
+            circle(g, x + s * 0.7F, y + s * 0.3F, f, color);
             float f1 = x + s * 0.5F;
             float f2 = y + s * 0.42F;
 
@@ -301,8 +346,6 @@ public final class Paint {
                 float f5 = s * 0.42F * (1.0F - f3);
                 box(g, f1 - f5, f4, f5 * 2.0F, Math.max(1.2F, s * 0.14F), color, 0.5F);
             }
-        } else {
-            text(g, "\u2665", x, y - 1.0F, color, s * 0.95F);
         }
     }
 
@@ -315,13 +358,13 @@ public final class Paint {
         int i = Theme.lerp(Theme.alpha(16777215, 28), Theme.ACCENT, f);
         grad(g, x, y, 34.0F, 16.0F, i, Theme.alpha(i, 180), 8.0F, true);
         float f1 = x + 2.0F + 16.0F * f;
-        if (f > 0.3F && Nvg.frame()) {
-            Nvg.circle(x + 26.0F, y + 8.0F, 8.0F, Theme.alpha(Theme.ACCENT_HOT, (int)(30.0F * f)));
+        if (f > 0.3F) {
+            circle(g, x + 26.0F, y + 8.0F, 8.0F, Theme.alpha(Theme.ACCENT_HOT, (int)(30.0F * f)));
         }
 
         box(g, f1, y + 2.0F, 12.0F, 12.0F, Theme.TEXT, 6.0F);
         if (f > 0.2F) {
-            Nvg.circle(x + 26.0F, y + 8.0F, 1.6F, Theme.alpha(Theme.TEXT, (int)(140.0F * f)));
+            circle(g, x + 26.0F, y + 8.0F, 1.6F, Theme.alpha(Theme.TEXT, (int)(140.0F * f)));
         }
     }
 

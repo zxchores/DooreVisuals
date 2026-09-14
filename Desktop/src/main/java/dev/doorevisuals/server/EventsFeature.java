@@ -5,7 +5,7 @@ import dev.doorevisuals.core.Category;
 import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
 import dev.doorevisuals.core.Tick;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudFeature;
@@ -84,10 +84,10 @@ public final class EventsFeature extends Feature implements Tick {
         if (this.on() && this.line != null && !this.line.isBlank()) {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             float f = minecraftclient.getWindow().getScaledWidth() * 0.5F;
-            Nvg.push();
+            Ui.push();
             Paint.hudPlate(g, f - 90.0F, 36.0F, 180.0F, 16.0F, Theme.ACCENT);
             Paint.textC(g, this.line, f, 40.0F, Theme.TEXT, 6.6F);
-            Nvg.pop();
+            Ui.pop();
         }
     }
 

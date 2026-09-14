@@ -17,6 +17,7 @@ import dev.doorevisuals.data.JsonImport;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Keys;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Skin;
 import dev.doorevisuals.draw.Sprites;
@@ -213,8 +214,8 @@ public final class PanelScreen extends Screen {
                 this.posNavY.springOpen(GuiLayout.navY, this.frameDt);
                 this.posBodyX.springOpen(GuiLayout.bodyX, this.frameDt);
                 this.posBodyY.springOpen(GuiLayout.bodyY, this.frameDt);
-                Nvg.run(g, () -> {
-                    Nvg.alpha(f2);
+                Ui.frame(g, () -> {
+                    Ui.alpha(f2);
                     int k = GuiWindowsFeature.dimAlpha();
                     if (k > 0) {
                         Paint.box(g, 0, 0, this.width, this.height, Theme.alpha(197639, (int)(k * f2)), 0.0F);
@@ -234,19 +235,24 @@ public final class PanelScreen extends Screen {
                     }
 
                     this.drawBridge(g);
-                    if (this.drop != null) {
-                        this.drawDrop(g);
-                    }
 
-                    if (this.colorPick != null) {
-                        this.drawColor(g);
-                    }
+                    // Pickers cover the rows they were opened from, and the shape batch is submitted
+                    // before the text of this block, so these have to stay on the older backend to
+                    // keep painting over it.
+                    Ui.nvgShapes(() -> {
+                        if (this.drop != null) {
+                            this.drawDrop(g);
+                        }
 
-                    if (this.bannerPick) {
-                        this.drawBannerPick(g);
-                    }
+                        if (this.colorPick != null) {
+                            this.drawColor(g);
+                        }
 
-                    Nvg.alpha(1.0F);
+                        if (this.bannerPick) {
+                            this.drawBannerPick(g);
+                        }
+                    });
+                    Ui.alpha(1.0F);
                 });
                 if (this.navChromeReady) {
                     if (this.navLogoS > 4) {
@@ -294,8 +300,8 @@ public final class PanelScreen extends Screen {
         float f5 = this.posNavY.value() + (1.0F - Anim.easeOut(f3)) * 18.0F * f;
         this.navRect = new float[]{f4, f5, f1, f2};
         this.navChromeReady = false;
-        Nvg.push();
-        Nvg.alpha(Math.max(0.0F, f3 * f3));
+        Ui.push();
+        Ui.alpha(Math.max(0.0F, f3 * f3));
         Paint.chromeGui(g, f4, f5, f1, f2, 12.0F * f);
         float f6 = 52.0F * f;
         this.navLogoS = Math.round(f6);
@@ -372,7 +378,7 @@ public final class PanelScreen extends Screen {
 
         this.drawFooter(g, f4 + 8.0F * f, f13, f1 - 16.0F * f, f12, f);
         this.navChromeReady = true;
-        Nvg.pop();
+        Ui.pop();
     }
 
     private void drawFooter(DrawContext g, float bx, float by, float bw, float banner, float s) {
@@ -503,8 +509,8 @@ public final class PanelScreen extends Screen {
             float f6 = this.posBodyY.value() + (1.0F - f3) * 10.0F * f;
             this.bodyRect = new float[]{f5, f6, f1, f2};
             Category category = GuiLayout.selected();
-            Nvg.push();
-            Nvg.alpha(Math.max(0.0F, f3 * f3));
+            Ui.push();
+            Ui.alpha(Math.max(0.0F, f3 * f3));
             Paint.chromeGui(g, f5, f6, f1, f2, 12.0F * f);
             float f7 = 36.0F * f;
             Paint.text(g, this.bodyTitle(category), f5 + 16.0F * f, f6 + 13.0F * f, Theme.TEXT, 10.5F * f);
@@ -591,7 +597,7 @@ public final class PanelScreen extends Screen {
                 this.drawModules(g, category, f5, f11, f1, f12);
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 
@@ -638,7 +644,7 @@ public final class PanelScreen extends Screen {
             this.inspectScrollVel = 0.0F;
         }
 
-        Nvg.scissor(x, y, f3, h);
+        Ui.scissor(x, y, f3, h);
         float f7 = y + 8.0F * f + f6;
         float f8 = 12.0F * f;
         Feature feature = null;
@@ -659,7 +665,7 @@ public final class PanelScreen extends Screen {
             f8 += f1 + f2;
         }
 
-        Nvg.unscissor();
+        Ui.unscissor();
         float f9 = Math.min(0.0F, h - f8);
         GuiLayout.Panel guilayout$panel = GuiLayout.get(category);
         guilayout$panel.scroll = Math.max(f9, Math.min(0.0F, guilayout$panel.scroll));
@@ -681,7 +687,7 @@ public final class PanelScreen extends Screen {
 
         float f1 = y + 8.0F * f;
         float f2 = h - 14.0F * f;
-        Nvg.scissor(x + 8.0F * f, f1, w - 16.0F * f, f2);
+        Ui.scissor(x + 8.0F * f, f1, w - 16.0F * f, f2);
         float f3 = f1 + this.inspectScroll;
         float f4 = 26.0F * f;
         float f5 = 10.0F * f;
@@ -729,7 +735,7 @@ public final class PanelScreen extends Screen {
             f5 += f4 + 4.0F * f;
         }
 
-        Nvg.unscissor();
+        Ui.unscissor();
         float f8 = Math.min(0.0F, f2 - f5);
         this.inspectScroll = Math.max(f8, Math.min(0.0F, this.inspectScroll));
         Paint.scrollbar(g, x + w - 8.0F * f, f1, f2, f5, f2, this.inspectScroll);
@@ -779,7 +785,7 @@ public final class PanelScreen extends Screen {
 
             float f5 = y + 36.0F * f;
             float f1 = h - 44.0F * f;
-            Nvg.scissor(x, f5, w, f1);
+            Ui.scissor(x, f5, w, f1);
             float f2 = f5 + this.inspectScroll;
             float f3 = 8.0F * f;
             if (feature instanceof CosmeticsFeature) {
@@ -872,7 +878,7 @@ public final class PanelScreen extends Screen {
                 }
             }
 
-            Nvg.unscissor();
+            Ui.unscissor();
             float f7 = Math.min(0.0F, f1 - f3);
             this.inspectScroll = Math.max(f7, Math.min(0.0F, this.inspectScroll));
             Paint.scrollbar(g, x + w - 6.0F * f, f5, f1, f3, f1, this.inspectScroll);
@@ -1391,7 +1397,7 @@ public final class PanelScreen extends Screen {
             float f3 = Math.min(f1, f2);
             Paint.shadow(panelscreen$dropmenu.x, panelscreen$dropmenu.y, panelscreen$dropmenu.w, f3, 12.0F, 12.0F);
             Paint.box(g, panelscreen$dropmenu.x, panelscreen$dropmenu.y, panelscreen$dropmenu.w, f3, Theme.PANEL_HI, 8.4F);
-            Nvg.scissor(panelscreen$dropmenu.x, panelscreen$dropmenu.y, panelscreen$dropmenu.w, f3);
+            Ui.scissor(panelscreen$dropmenu.x, panelscreen$dropmenu.y, panelscreen$dropmenu.w, f3);
             float f4 = panelscreen$dropmenu.y + 4.0F * this.uiScale + panelscreen$dropmenu.scroll;
 
             for (String s : panelscreen$dropmenu.pick.options()) {
@@ -1420,7 +1426,7 @@ public final class PanelScreen extends Screen {
                 f4 += f;
             }
 
-            Nvg.unscissor();
+            Ui.unscissor();
             panelscreen$dropmenu.maxScroll = Math.min(0.0F, f3 - f2);
             panelscreen$dropmenu.scroll = Math.max(panelscreen$dropmenu.maxScroll, Math.min(0.0F, panelscreen$dropmenu.scroll));
         }
@@ -1519,7 +1525,7 @@ public final class PanelScreen extends Screen {
         float f6 = (f1 - 36.0F * f) / 2.0F;
         float f7 = 52.0F * f;
         int i = 0;
-        Nvg.scissor(f3, f4 + 32.0F * f, f1, f2 - 70.0F * f);
+        Ui.scissor(f3, f4 + 32.0F * f, f1, f2 - 70.0F * f);
 
         for (BannerLibrary.Entry bannerlibrary$entry : BannerLibrary.entries()) {
             float f8 = f3 + 12.0F * f + i * (f6 + 8.0F * f);
@@ -1545,7 +1551,7 @@ public final class PanelScreen extends Screen {
             }
         }
 
-        Nvg.unscissor();
+        Ui.unscissor();
         float f9 = f4 + f2 - 28.0F * f;
         Paint.box(g, f3 + 12.0F * f, f9, f1 - 24.0F * f, 18.0F * f, Theme.alpha(Theme.ACCENT, 40), 7.0F);
         Paint.textC(g, "Add PNG / GIF / MP4", f3 + f1 * 0.5F, f9 + 4.0F * f, Theme.ACCENT_HOT, 6.2F * f);

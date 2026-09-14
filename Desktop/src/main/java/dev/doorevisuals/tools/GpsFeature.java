@@ -14,6 +14,7 @@ import dev.doorevisuals.core.Tick;
 import dev.doorevisuals.data.ClientPaths;
 import dev.doorevisuals.draw.Mesh;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.draw.Types;
@@ -227,7 +228,7 @@ public final class GpsFeature extends Feature implements Tick {
         if (minecraftclient.player != null && !this.markers.isEmpty() && !minecraftclient.options.hudHidden) {
             String s = dimId(minecraftclient);
             Vec3d vec3d = minecraftclient.player.getCameraPosVec(minecraftclient.getRenderTickCounter().getTickProgress(false));
-            Nvg.push();
+            Ui.push();
 
             for (GpsFeature.Marker gpsfeature$marker : this.markers) {
                 if (sameDim(gpsfeature$marker, s)) {
@@ -262,7 +263,7 @@ public final class GpsFeature extends Feature implements Tick {
                 }
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 
