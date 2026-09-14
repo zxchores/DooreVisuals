@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public final class DooreClient implements ClientModInitializer {
     public static final String ID = "doorevisuals";
-    public static final String VERSION = "3.32.0";
+    public static final String VERSION = "3.33.0";
     private static final Logger LOG = LoggerFactory.getLogger("DooreVisuals");
     private static final Category KEYS = Category.create(Identifier.of("doorevisuals", "main"));
 

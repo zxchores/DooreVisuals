@@ -264,7 +264,7 @@ public final class AtmosphereFeature extends Feature implements Tick {
         }
 
         this.paintedAt = f;
-        return this.painted;
+        return VANILLA.equals(this.timePreset.get()) ? this.painted.afterDark(nightWeight()) : this.painted;
     }
 
     private static float dayPhase() {

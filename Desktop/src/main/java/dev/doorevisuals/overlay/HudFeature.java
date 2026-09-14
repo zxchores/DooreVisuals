@@ -55,6 +55,16 @@ public final class HudFeature extends Feature {
     };
     private final Opt.Flag watermark = this.opt(new Opt.Flag("watermark", "\u0412\u0430\u0442\u0435\u0440\u043c\u0430\u0440\u043a", true));
     private final Opt.Flag coords = this.opt(new Opt.Flag("coords", "TPS / XYZ", true));
+    private final Opt.Pick coordsStyle = this.opt(
+        new Opt.Pick(
+                "coords_style",
+                "\u0421\u0442\u0438\u043b\u044c \u043a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0442",
+                "\u041f\u043e\u043b\u043d\u044b\u0439",
+                "\u041f\u043e\u043b\u043d\u044b\u0439",
+                "X Y Z"
+            )
+            .visibleWhen(this.coords::get)
+    );
     private final Opt.Flag keys = this.opt(new Opt.Flag("keys", "\u041a\u043b\u0430\u0432\u0438\u0448\u0438", false));
     private final Opt.Flag mouseKeys = this.opt(new Opt.Flag("mouse_keys", "\u041b\u041a\u041c / \u041f\u041a\u041c", true).visibleWhen(this.keys::get));
     private final Opt.Flag armor = this.opt(new Opt.Flag("armor", "\u0411\u0440\u043e\u043d\u044f", true));
@@ -139,6 +149,7 @@ public final class HudFeature extends Feature {
     private int watermarkIconY;
     private int watermarkIconS;
     private boolean watermarkIconReady;
+    private final List<HudFeature.PlateIcon> watermarkIcons = new ArrayList<>();
     private int targetHeadX;
     private int targetHeadY;
     private int targetHeadS;
@@ -597,6 +608,25 @@ public final class HudFeature extends Feature {
                     } catch (Throwable throwable1) {
                     }
                 }
+
+                for (HudFeature.PlateIcon hudfeature$plateicon : this.watermarkIcons) {
+                    try {
+                        g.drawTexture(
+                            RenderPipelines.GUI_TEXTURED,
+                            hudfeature$plateicon.tex,
+                            hudfeature$plateicon.x,
+                            hudfeature$plateicon.y,
+                            0.0F,
+                            0.0F,
+                            hudfeature$plateicon.s,
+                            hudfeature$plateicon.s,
+                            hudfeature$plateicon.s,
+                            hudfeature$plateicon.s,
+                            hudfeature$plateicon.color
+                        );
+                    } catch (Throwable throwable) {
+                    }
+                }
             }
 
             if (this.show(this.targetHud, "target_hud") && this.targetHeadReady) {
@@ -781,17 +811,17 @@ public final class HudFeature extends Feature {
         Paint.box(g, f11, 5.0F, 1.0F, f - 10.0F, Theme.alpha(16777215, 22), 0.0F);
         Paint.box(g, f12, 5.0F, 1.0F, f - 10.0F, Theme.alpha(16777215, 22), 0.0F);
         Paint.box(g, 8.0F, 5.0F, f3, f3, Theme.alpha(329483, 200), 3.5F);
-        Nvg.circle(f5 + 14.0F, f * 0.38F, 3.1F, Theme.alpha(16777215, 210));
-        Paint.box(g, f5 + 10.2F, f * 0.52F, 7.6F, 4.4F, Theme.alpha(16777215, 210), 2.2F);
         Paint.text(g, s, f5 + 22.0F, (f - f4) * 0.5F, Theme.TEXT, f4);
-        Paint.box(g, f11 + 10.0F, 7.2F, 8.0F, 2.0F, Theme.alpha(16777215, 200), 0.8F);
-        Paint.box(g, f11 + 11.2F, 10.2F, 8.0F, 2.0F, Theme.alpha(16777215, 160), 0.8F);
-        Paint.box(g, f11 + 12.4F, 13.2F, 8.0F, 2.0F, Theme.alpha(16777215, 120), 0.8F);
         Paint.text(g, s1, f11 + 22.0F, (f - f4) * 0.5F, Theme.TEXT, f4);
-        Nvg.circle(f12 + 14.0F, f * 0.5F, 4.2F, Theme.alpha(j, 40));
-        Nvg.ring(f12 + 10.2F, f * 0.5F - 3.8F, 7.6F, 7.6F, 1.15F, Theme.alpha(16777215, 210), 3.8F);
         Paint.text(g, s2, f12 + 22.0F, (f - f4) * 0.5F, Theme.TEXT, f4);
         Ui.pop();
+        float f13 = 12.0F;
+        int k = Math.max(8, Math.round(f13 * f10));
+        int l = Math.round(screen(afloat[1], (f - f13) * 0.5F, f10));
+        this.watermarkIcons.clear();
+        this.watermarkIcons.add(new HudFeature.PlateIcon(Sprites.ICON_PLAYER, Math.round(screen(afloat[0], f5 + 7.0F, f10)), l, k, Theme.alpha(16777215, 215)));
+        this.watermarkIcons.add(new HudFeature.PlateIcon(Sprites.ICON_FPS, Math.round(screen(afloat[0], f11 + 7.0F, f10)), l, k, Theme.alpha(16777215, 215)));
+        this.watermarkIcons.add(new HudFeature.PlateIcon(Sprites.ICON_PING, Math.round(screen(afloat[0], f12 + 7.0F, f10)), l, k, Theme.alpha(j, 235)));
         this.watermarkIconS = Math.max(8, Math.round((f3 - 1.2F) * f10));
         this.watermarkIconX = Math.round(screen(afloat[0], 8.4F, f10));
         this.watermarkIconY = Math.round(screen(afloat[1], 5.4F, f10));
@@ -801,6 +831,11 @@ public final class HudFeature extends Feature {
     private void paintCoords(DrawContext g, MinecraftClient mc) {
         HudSlot hudslot = this.slots.get("coords");
         ClientPlayerEntity clientplayerentity = mc.player;
+        if ("X Y Z".equals(this.coordsStyle.get())) {
+            this.paintCoordsPlain(g, mc, hudslot, clientplayerentity);
+            return;
+        }
+
         float f = TpsMeter.tps();
         String s = String.format(Locale.ROOT, "%.1f TPS", f);
         String s1 = (int)Math.floor(clientplayerentity.getX())
@@ -831,6 +866,44 @@ public final class HudFeature extends Feature {
         Paint.text(g, s, 18.0F, 6.5F, j, 8.0F);
         Paint.textR(g, s2 + "  " + s3, f1 - 8.0F, 7.2F, Theme.MUTED, 6.4F);
         Paint.text(g, s1, 10.0F, 18.5F, Theme.alpha(16777215, 190), 7.2F);
+        Ui.pop();
+    }
+
+    private void paintCoordsPlain(DrawContext g, MinecraftClient mc, HudSlot slot, ClientPlayerEntity player) {
+        String[] labels = new String[]{"X", "Y", "Z"};
+        String[] values = new String[]{
+            Integer.toString((int)Math.floor(player.getX())),
+            Integer.toString((int)Math.floor(player.getY())),
+            Integer.toString((int)Math.floor(player.getZ()))
+        };
+        float size = 7.6F;
+        float pad = 9.0F;
+        float gap = 9.0F;
+        float lead = 4.0F;
+        float w = pad * 2.0F - gap;
+
+        for (int i = 0; i < labels.length; i++) {
+            w += Paint.tw(labels[i], size) + lead + Paint.tw(values[i], size) + gap;
+        }
+
+        float h = 18.0F;
+        slot.size(w, h);
+        float[] afloat = this.slotPos(slot, w, h, mc);
+        int accent = this.hudAccent();
+        Ui.push();
+        Ui.move(afloat[0], afloat[1]);
+        Ui.scale(slot.scale(), slot.scale());
+        this.hudPlate(g, w, h, accent);
+        float x = pad;
+        float y = (h - size) * 0.5F;
+
+        for (int i = 0; i < labels.length; i++) {
+            Paint.text(g, labels[i], x, y, Theme.alpha(accent, 215), size);
+            x += Paint.tw(labels[i], size) + lead;
+            Paint.text(g, values[i], x, y, Theme.TEXT, size);
+            x += Paint.tw(values[i], size) + gap;
+        }
+
         Ui.pop();
     }
 
@@ -1364,6 +1437,9 @@ public final class HudFeature extends Feature {
     }
 
     private record IconBlit(Identifier tex, int x, int y, int s) {
+    }
+
+    private record PlateIcon(Identifier tex, int x, int y, int s, int color) {
     }
 
     private record Note(String title, String body, long at, HudFeature.NoteKind kind) {
