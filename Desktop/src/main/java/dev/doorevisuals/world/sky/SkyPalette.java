@@ -9,6 +9,10 @@ import dev.doorevisuals.draw.Theme;
 public record SkyPalette(
     int zenith, int horizon, int nadir, int cloud, int auroraA, int auroraB, float turbidity, float coverage
 ) {
+    private static final int NIGHT_ZENITH = -16315620;
+    private static final int NIGHT_HORIZON = -15195064;
+    private static final int NIGHT_CLOUD = -7692072;
+
     public static SkyPalette of(SkyPreset preset, int accent) {
         return new SkyPalette(
             preset.zenith(),
@@ -20,6 +24,28 @@ public record SkyPalette(
             preset.turbidity(),
             preset.coverage()
         );
+    }
+
+    /**
+     * The same sky after sundown. Presets that follow the world clock keep their daylight colours,
+     * so without this the shell stays bright blue at midnight while the moon is already up.
+     */
+    public SkyPalette afterDark(float t) {
+        if (t <= 0.001F) {
+            return this;
+        } else {
+            float f = Math.min(1.0F, t);
+            return new SkyPalette(
+                Theme.lerp(this.zenith, NIGHT_ZENITH, f),
+                Theme.lerp(this.horizon, NIGHT_HORIZON, f),
+                this.nadir,
+                Theme.lerp(this.cloud, NIGHT_CLOUD, f),
+                this.auroraA,
+                this.auroraB,
+                this.turbidity * (1.0F - 0.55F * f),
+                this.coverage
+            );
+        }
     }
 
     public SkyPalette lerp(SkyPalette to, float t) {
