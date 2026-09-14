@@ -1,7 +1,7 @@
 {
-  "mod_version": "3.32.0",
-  "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.32.0/doorevisuals-3.32.0.jar",
-  "mod_sha256": "91101e86d9bac9a316c4c86fa7a7378aef1d0f43c0dc455e1d99ac462a915d47",
+  "mod_version": "3.33.0",
+  "mod_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.33.0/doorevisuals-3.33.0.jar",
+  "mod_sha256": "9737cc96f5d236b1d25774be33a2844993185e849950925adb9719f6b82de862",
   "launcher_version": "3.10.0",
   "launcher_download_url": "https://github.com/zxchores/DooreVisuals/releases/download/v3.30.0/DooreVisuals.exe",
   "launcher_sha256": "894963b7d7166d510a0c7ab7d3ab010a616652fad23e926091a4107db93d6018",
@@ -14,6 +14,22 @@
     {
       "name": "fabric-language-kotlin-1.13.9+kotlin.2.3.10.jar",
       "url": "https://cdn.modrinth.com/data/Ha28R6CL/versions/ViT4gucI/fabric-language-kotlin-1.13.9+kotlin.2.3.10.jar"
+    },
+    {
+      "name": "ImmediatelyFast-Fabric-1.14.3+1.21.11.jar",
+      "url": "https://cdn.modrinth.com/data/5ZwdcRci/versions/4EwhsTu7/ImmediatelyFast-Fabric-1.14.3%2B1.21.11.jar"
+    },
+    {
+      "name": "lithium-fabric-0.21.4+mc1.21.11.jar",
+      "url": "https://cdn.modrinth.com/data/gvQqBUqZ/versions/Ow7wA0kG/lithium-fabric-0.21.4%2Bmc1.21.11.jar"
+    },
+    {
+      "name": "ferritecore-8.2.0-fabric.jar",
+      "url": "https://cdn.modrinth.com/data/uXXizFIs/versions/Ii0gP3D8/ferritecore-8.2.0-fabric.jar"
+    },
+    {
+      "name": "sodium-fabric-0.8.14+mc1.21.11.jar",
+      "url": "https://cdn.modrinth.com/data/AANobbMI/versions/rkdTcxoT/sodium-fabric-0.8.14%2Bmc1.21.11.jar"
     }
   ]
 }
