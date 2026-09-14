@@ -937,7 +937,7 @@ public final class HudFeature extends Feature {
                     l++;
                     boolean flag2 = armorLow(itemstack);
                     if (flag2) {
-                        float f3 = 0.55F + 0.45F * (float)Math.sin(System.currentTimeMillis() / 180.0);
+                        float f3 = 0.55F + 0.45F * (float)Math.sin(Anim.timeSec() * 5.5555F);
                         Paint.box(g, f2 - 1.0F, 2.0F, 20.0F, 20.0F, Theme.alpha(16730698, (int)(90.0F + 80.0F * f3)), 5.0F);
                     }
 
