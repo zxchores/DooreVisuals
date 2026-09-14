@@ -250,9 +250,9 @@ public final class PreviewPane {
     private static void drawSky(DrawContext g, float x, float y, float w, float h, float s) {
         Paint.grad(g, x, y, w, h * 0.62F, -15392704, -30134, 8.4F * s, true);
         Paint.grad(g, x, y + h * 0.58F, w, h * 0.42F, -30134, -15069152, 0.0F, true);
-        Nvg.circle(x + w * 0.72F, y + h * 0.28F, 18.0F * s, Theme.alpha(-5984, 200));
-        Nvg.circle(x + w * 0.72F, y + h * 0.28F, 28.0F * s, Theme.alpha(-16272, 50));
-        Paint.text(g, "\u043d\u0435\u0431\u043e \u00b7 \u0437\u0430\u043a\u0430\u0442", x + 12.0F * s, y + 12.0F * s, Theme.TEXT, 6.4F * s);
+        Paint.box(g, x + w * 0.72F - 28.0F * s, y + h * 0.28F - 28.0F * s, 56.0F * s, 56.0F * s, Theme.alpha(-16272, 50), 28.0F * s);
+        Paint.box(g, x + w * 0.72F - 18.0F * s, y + h * 0.28F - 18.0F * s, 36.0F * s, 36.0F * s, Theme.alpha(-5984, 200), 18.0F * s);
+        Paint.text(g, "небо · закат", x + 12.0F * s, y + 12.0F * s, Theme.TEXT, 6.4F * s);
     }
 
     private static void drawHatOverlay(DrawContext g, float x, float y, float w, float h, ChinaHatFeature hat, float s) {

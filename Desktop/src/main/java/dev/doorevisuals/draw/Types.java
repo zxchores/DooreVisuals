@@ -13,6 +13,7 @@ public final class Types {
     private static final RenderLayer SCAN = sorted("dv3_scan", Gpu.SCAN_PIPE);
     private static final RenderLayer GHOST = sorted("dv3_ghost", Gpu.GHOST_PIPE);
     private static final RenderLayer ORB = sorted("dv3_orb", Gpu.ORB_PIPE);
+    private static final RenderLayer SKY = sorted("dv3_sky", Gpu.SKY_PIPE);
     private static final RenderLayer LINES = RenderLayer.of("dv3_lines", RenderSetup.builder(RenderPipelines.LINES).build());
     private static final RenderLayer LINES_TX = RenderLayer.of(
         "dv3_lines_tx", RenderSetup.builder(RenderPipelines.LINES_TRANSLUCENT).translucent().build()
@@ -51,6 +52,10 @@ public final class Types {
 
     public static RenderLayer orb() {
         return ORB;
+    }
+
+    public static RenderLayer sky() {
+        return SKY;
     }
 
     public static RenderLayer lines() {

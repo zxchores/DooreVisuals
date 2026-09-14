@@ -28,6 +28,7 @@ public class FogMixin {
         if (FogFeature.active()) {
             Vector4f vector4f = new Vector4f((Vector4fc)cir.getReturnValue());
             AmbienceFeature.applyColor(vector4f);
+            FogFeature.applyColor(vector4f);
             cir.setReturnValue(vector4f);
         }
     }
@@ -51,6 +52,7 @@ public class FogMixin {
     ) {
         if (FogFeature.active()) {
             AmbienceFeature.applyColor(color);
+            FogFeature.applyColor(color);
             float[] afloat = FogFeature.bufferDistances(renderDistanceEnd);
             original.call(new Object[]{self, buffer, bufPos, color, afloat[0], afloat[1], afloat[2], afloat[3], afloat[4], afloat[5]});
         } else {

@@ -60,7 +60,7 @@ public final class Changelog {
     }
 
     public static boolean isCurrent(String version) {
-        return "3.31.0".equals(version);
+        return "3.32.0".equals(version);
     }
 
     public record Entry(String version, String title, List<String> bullets) {

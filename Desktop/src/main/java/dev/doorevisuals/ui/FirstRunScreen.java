@@ -2,7 +2,6 @@ package dev.doorevisuals.ui;
 
 import dev.doorevisuals.App;
 import dev.doorevisuals.data.FirstRun;
-import dev.doorevisuals.draw.Nvg;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.tools.ThemeFeature;
@@ -30,8 +29,8 @@ public final class FirstRunScreen extends Screen {
         this.mx = mouseX;
         this.my = mouseY;
         this.hits.clear();
-        g.fill(0, 0, this.width, this.height, -16447480);
-        Nvg.run(g, () -> this.paint(g));
+        MenuAtmosphere.paintBackground(g, this.width, this.height);
+        this.paint(g);
     }
 
     private void paint(DrawContext g) {
@@ -160,8 +159,8 @@ public final class FirstRunScreen extends Screen {
             float f1 = f + i * (float) (Math.PI * 2.0 / 3.0);
             float f2 = x + (float)Math.cos(f1) * 16.0F;
             float f3 = y + (float)Math.sin(f1 * 1.15) * 11.0F;
-            Nvg.circle(f2, f3, 5.5F, Theme.alpha(Theme.ACCENT, 50));
-            Nvg.circle(f2, f3, 3.2F, Theme.alpha(Theme.ACCENT, 210));
+            Paint.box(g, f2 - 5.5F, f3 - 5.5F, 11.0F, 11.0F, Theme.alpha(Theme.ACCENT, 50), 6.0F);
+            Paint.box(g, f2 - 3.2F, f3 - 3.2F, 6.4F, 6.4F, Theme.alpha(Theme.ACCENT, 210), 4.0F);
         }
     }
 

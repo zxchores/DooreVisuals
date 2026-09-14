@@ -34,6 +34,28 @@ public final class TimeWeatherFeature {
         return weatherMode;
     }
 
+    public static long visualTime() {
+        if (timeLocked()) {
+            return lockedTime();
+        } else {
+            MinecraftClient minecraftclient = MinecraftClient.getInstance();
+            if (minecraftclient.world == null) {
+                return 6000L;
+            } else {
+                RAW.set(true);
+
+                long i;
+                try {
+                    i = minecraftclient.world.getTimeOfDay();
+                } finally {
+                    RAW.set(false);
+                }
+
+                return i;
+            }
+        }
+    }
+
     public static void applyLive(boolean on, boolean lock, int time, float speed, String weather) {
         if (!on) {
             timeLocked = false;
