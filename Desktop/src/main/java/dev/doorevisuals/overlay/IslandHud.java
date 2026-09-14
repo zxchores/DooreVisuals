@@ -17,8 +17,10 @@ import net.minecraft.client.gui.screen.ChatScreen;
 public final class IslandHud {
     private static final long EVENT_MS = 2500L;
     private static final int QUEUE_CAP = 6;
+    private static final int BANDS = 4;
     private final Anim reveal = new Anim(0.0F);
     private final Anim expand = new Anim(0.0F);
+    private final Anim[] bands = bands();
     private final ArrayDeque<IslandHud.Event> queue = new ArrayDeque<>();
     private boolean pinned;
     private boolean hitsReady;
@@ -124,6 +126,7 @@ public final class IslandHud {
             boolean flag2 = mediahub$snap.available();
             boolean flag3 = flag2 || flag1 || flag || editor || this.pinned;
             this.hitsReady = false;
+            this.driveBands(flag2 && mediahub$snap.playing(), (float)mediahub$snap.progress(), dt);
             float f = this.reveal.spring(flag3 ? 1.0F : 0.0F, 190.0F, 28.0F, dt);
             if (!flag3) {
                 this.expand.spring(0.0F, 165.0F, 28.0F, dt);
@@ -216,25 +219,18 @@ public final class IslandHud {
                         Ui.unscissor();
                     }
 
-                    float f40 = f13 - 26.0F;
-
-                    for (int j = 0; j < 3; j++) {
-                        float f43 = flag5
-                            ? 0.35F + 0.65F * (0.5F + 0.5F * (float)Math.sin(f16 * (7.5F + j * 1.7F) + j + f15 * 6.0F))
-                            : (!flag1 && !flag ? 0.22F + 0.1F * j : 0.45F + 0.2F * j);
-                        float f31 = 3.5F + 10.0F * f43;
-                        Paint.box(g, f40 + j * 5.0F, 6.0F + (12.0F - f31), 2.3F, f31, Theme.alpha(i, 200), 1.0F);
-                    }
-
+                    this.paintBands(g, f13 - 24.0F, 18.0F, 2.2F, 2.4F, 11.0F, Theme.alpha(i, 200));
                     Ui.alpha(f17);
                 }
 
                 if (f19 > 0.04F) {
                     Ui.alpha(f17 * f19);
-                    float f37 = f22 + f21 + 9.0F;
-                    Paint.text(g, trim(s1, 24), f37, 8.0F, Theme.TEXT, 7.6F);
+                    float f46 = f22 + f21 + 7.0F;
+                    this.paintBands(g, f46, f23 + f21, 3.0F, 3.0F, f21 * 0.72F, Theme.alpha(i, 215));
+                    float f37 = f46 + bandsWidth(3.0F, 3.0F) + 8.0F;
+                    Paint.text(g, trim(s1, 22), f37, 8.0F, Theme.TEXT, 7.6F);
                     if (!s2.isEmpty()) {
-                        Paint.text(g, trim(s2, 28), f37, 20.0F, Theme.MUTED, 6.3F);
+                        Paint.text(g, trim(s2, 26), f37, 20.0F, Theme.MUTED, 6.3F);
                     }
 
                     float f38 = 12.0F;
@@ -286,6 +282,49 @@ public final class IslandHud {
                 this.hitsReady = editor || minecraftclient.currentScreen == null;
             }
         }
+    }
+
+    /**
+     * The system media API gives no spectrum, so each band gets its own wave seeded by track
+     * progress and pulled by a spring. Low bands swing wider and slower than high ones, which is
+     * what makes the stack read as an equalizer rather than four sines in a row.
+     */
+    private void driveBands(boolean playing, float progress, float dt) {
+        float time = Anim.timeSec();
+
+        for (int band = 0; band < BANDS; band++) {
+            float target;
+            if (playing) {
+                float beat = 0.5F + 0.5F * (float)Math.sin(time * (6.4F + band * 2.3F) + band * 1.9F + progress * 24.0F);
+                float sway = 0.5F + 0.5F * (float)Math.sin(time * (1.6F + band * 0.5F) + progress * 7.0F);
+                target = (0.2F + 0.8F * beat) * (0.62F + 0.38F * sway) * (1.0F - 0.16F * band);
+            } else {
+                target = 0.1F + 0.04F * band;
+            }
+
+            this.bands[band].spring(target, playing ? 300.0F : 130.0F, 24.0F, dt);
+        }
+    }
+
+    private void paintBands(DrawContext g, float x, float bottom, float barW, float gap, float maxH, int color) {
+        for (int band = 0; band < BANDS; band++) {
+            float h = Math.max(barW, maxH * Math.max(0.0F, this.bands[band].value()));
+            Paint.box(g, x + band * (barW + gap), bottom - h, barW, h, color, barW * 0.5F);
+        }
+    }
+
+    private static float bandsWidth(float barW, float gap) {
+        return BANDS * barW + (BANDS - 1) * gap;
+    }
+
+    private static Anim[] bands() {
+        Anim[] anim = new Anim[4];
+
+        for (int i = 0; i < 4; i++) {
+            anim[i] = new Anim(0.1F);
+        }
+
+        return anim;
     }
 
     private void pulseMedia() {
