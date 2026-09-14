@@ -108,7 +108,7 @@ public final class Sdf {
     private static void shape(
         DrawContext g, float x, float y, float w, float h, int colorA, int colorB, boolean vertical, float radius, float border, float blur
     ) {
-        if (!dead && g != null && !(w <= 0.0F) && !(h <= 0.0F)) {
+        if (!dead && (g != null || bound != null) && !(w <= 0.0F) && !(h <= 0.0F)) {
             float f = Ui.alpha();
             int i = fade(colorA, f);
             int j = colorB == colorA ? i : fade(colorB, f);
