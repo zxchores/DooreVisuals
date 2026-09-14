@@ -44,11 +44,11 @@ public final class WorldPipe {
                 }
             });
             WorldRenderEvents.BEFORE_ENTITIES.register(ctx -> safe(() -> {
+                VisualQuality.beginFrame();
                 float f = partial();
                 App.features().find(AtmosphereFeature.class).filter(Feature::on).ifPresent(fx -> fx.drawSky(ctx, f));
             }));
             WorldRenderEvents.AFTER_ENTITIES.register((AfterEntities)ctx -> safe(() -> {
-                VisualQuality.beginFrame();
                 float f = partial();
                 App.features().find(TargetEspFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));
                 App.features().find(PredictionsFeature.class).filter(Feature::on).ifPresent(fx -> fx.draw(ctx, f));

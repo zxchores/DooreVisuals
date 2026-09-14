@@ -3,16 +3,20 @@ package dev.doorevisuals.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class FeatureBus {
     private final List<Feature> features = new ArrayList<>();
+    private final Map<Class<?>, Optional<? extends Feature>> lookup = new ConcurrentHashMap<>();
     private Runnable dirty = () -> {};
 
     public <T extends Feature> T add(T feature) {
         feature.installToggleBind();
         feature.dirty(() -> this.dirty.run());
         this.features.add(feature);
+        this.lookup.clear();
         feature.syncRuntime();
         return feature;
     }
@@ -39,14 +43,27 @@ public final class FeatureBus {
         return List.copyOf(list);
     }
 
+    /**
+     * Hot path: called dozens of times per frame from render code, so the linear scan over every
+     * registered feature is memoised. The cache is dropped whenever the feature list changes.
+     */
+    @SuppressWarnings("unchecked")
     public <T extends Feature> Optional<T> find(Class<T> type) {
-        for (Feature feature : this.features) {
-            if (type.isInstance(feature)) {
-                return Optional.of(type.cast(feature));
+        Optional<? extends Feature> optional = this.lookup.get(type);
+        if (optional == null) {
+            optional = Optional.empty();
+
+            for (Feature feature : this.features) {
+                if (type.isInstance(feature)) {
+                    optional = Optional.of(type.cast(feature));
+                    break;
+                }
             }
+
+            this.lookup.put(type, optional);
         }
 
-        return Optional.empty();
+        return (Optional<T>)optional;
     }
 
     public void onDirty(Runnable dirty) {
