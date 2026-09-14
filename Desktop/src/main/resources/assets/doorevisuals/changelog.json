@@ -1,6 +1,14 @@
 {
   "entries": [
     {
+      "version": "3.32.0",
+      "title": "Title menu + Atmosphere",
+      "bullets": [
+        "Новое главное меню: кастомные кнопки, без чёрного экрана",
+        "Atmosphere: шейдер неба, цвет тумана, звёзды/снег, без quality/chunk fade"
+      ]
+    },
+    {
       "version": "3.31.0",
       "title": "FunTime helpers + Models",
       "bullets": [

@@ -38,17 +38,18 @@ public final class MenuAtmosphere {
             } catch (Throwable throwable) {
             }
 
-            g.fill(0, 0, w, h, Theme.alpha(Theme.ACCENT_DEEP, 120));
-            g.fill(0, 0, Math.max(1, w * 2 / 5), h, Theme.alpha(Theme.ACCENT_DEEP, 70));
-            g.fill(0, h - 64, w, h, Theme.alpha(132616, 140));
+            g.fill(0, 0, w, h, Theme.alpha(Theme.ACCENT_DEEP, 100));
+            g.fill(0, 0, Math.max(2, w / 3), h, Theme.alpha(Theme.ACCENT_DEEP, 80));
+            g.fill(0, 0, 3, h, Theme.alpha(Theme.ACCENT, 170));
+            g.fill(0, h - Math.max(48, h / 7), w, h, Theme.alpha(8, 150));
         }
     }
 
     public static void paintOverlay(DrawContext g, int w, int h, String title) {
         if (w > 0 && h > 0) {
             g.fill(0, 0, 3, h, Theme.alpha(Theme.ACCENT, 180));
-            Paint.box(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(593939, 200), 10.0F);
-            Paint.outline(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(Theme.ACCENT, 50), 10.0F);
+            Paint.box(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(10, 190), 12.0F);
+            Paint.outline(g, 14.0F, 12.0F, Math.min(260.0F, w * 0.42F), 44.0F, Theme.alpha(Theme.ACCENT, 55), 12.0F);
             Paint.text(g, title, 28.0F, 22.0F, Theme.TEXT, 13.0F);
             Paint.text(g, "DOORE  ·  v" + DooreClient.VERSION, 28.0F, 40.0F, Theme.alpha(Theme.ACCENT_HOT, 200), 8.0F);
             Paint.text(g, "visual client", 18.0F, h - 20.0F, Theme.MUTED, 7.5F);
