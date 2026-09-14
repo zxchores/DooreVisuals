@@ -3,6 +3,7 @@ package dev.doorevisuals.draw;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderPipeline.Snippet;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.VertexFormats;
@@ -22,19 +23,13 @@ public final class Gpu {
     public static final RenderPipeline HOLO_PIPE = quad("pipeline/v3_holo", HOLO, BlendFunction.TRANSLUCENT);
     public static final RenderPipeline SCAN_PIPE = quad("pipeline/v3_scan", SCAN, BlendFunction.TRANSLUCENT);
     public static final RenderPipeline GHOST_PIPE = quad("pipeline/v3_ghost", GHOST, BlendFunction.TRANSLUCENT);
-    public static final RenderPipeline ORB_PIPE = RenderPipelines.register(
-        RenderPipeline.builder(new Snippet[]{RenderPipelines.POSITION_COLOR_SNIPPET, RenderPipelines.GLOBALS_SNIPPET})
-            .withLocation(id("pipeline/v3_orb"))
-            .withVertexShader(ORB)
-            .withFragmentShader(ORB)
-            .withBlend(BlendFunction.LIGHTNING)
-            .withDepthWrite(false)
-            .withCull(false)
-            .withVertexFormat(VertexFormats.POSITION_TEXTURE_COLOR, DrawMode.QUADS)
-            .build()
-    );
     private static final Identifier SKY = id("core/atmo_sky");
-    public static final RenderPipeline SKY_PIPE = quad("pipeline/v3_sky", SKY, BlendFunction.TRANSLUCENT);
+    private static final Identifier CLOUD = id("core/atmo_cloud");
+    private static final Identifier AURORA = id("core/atmo_aurora");
+    public static final RenderPipeline ORB_PIPE = textured("pipeline/v3_orb", ORB, BlendFunction.LIGHTNING);
+    public static final RenderPipeline SKY_PIPE = textured("pipeline/v3_sky", SKY, BlendFunction.TRANSLUCENT);
+    public static final RenderPipeline CLOUD_PIPE = textured("pipeline/v3_cloud", CLOUD, BlendFunction.TRANSLUCENT);
+    public static final RenderPipeline AURORA_PIPE = textured("pipeline/v3_aurora", AURORA, BlendFunction.LIGHTNING);
 
     private Gpu() {
     }
@@ -48,9 +43,19 @@ public final class Gpu {
         GHOST_PIPE.getClass();
         ORB_PIPE.getClass();
         SKY_PIPE.getClass();
+        CLOUD_PIPE.getClass();
+        AURORA_PIPE.getClass();
     }
 
     private static RenderPipeline quad(String loc, Identifier shader, BlendFunction blend) {
+        return pipe(loc, shader, blend, VertexFormats.POSITION_COLOR);
+    }
+
+    private static RenderPipeline textured(String loc, Identifier shader, BlendFunction blend) {
+        return pipe(loc, shader, blend, VertexFormats.POSITION_TEXTURE_COLOR);
+    }
+
+    private static RenderPipeline pipe(String loc, Identifier shader, BlendFunction blend, VertexFormat format) {
         return RenderPipelines.register(
             RenderPipeline.builder(new Snippet[]{RenderPipelines.POSITION_COLOR_SNIPPET, RenderPipelines.GLOBALS_SNIPPET})
                 .withLocation(id(loc))
@@ -59,7 +64,7 @@ public final class Gpu {
                 .withBlend(blend)
                 .withDepthWrite(false)
                 .withCull(false)
-                .withVertexFormat(VertexFormats.POSITION_COLOR, DrawMode.QUADS)
+                .withVertexFormat(format, DrawMode.QUADS)
                 .build()
         );
     }
