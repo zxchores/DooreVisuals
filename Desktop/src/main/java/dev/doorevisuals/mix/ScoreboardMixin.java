@@ -1,6 +1,6 @@
 package dev.doorevisuals.mix;
 
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudTweaksFeature;
@@ -37,7 +37,7 @@ public class ScoreboardMixin {
             int i = minecraftclient.getWindow().getScaledWidth();
             g.getMatrices().translate(f1 + i * (1.0F - f), f2);
             g.getMatrices().scale(f, f);
-            Nvg.run(g, () -> paintGlass(g, objective));
+            Ui.frame(g, () -> paintGlass(g, objective));
             g.getMatrices().popMatrix();
             HudTweaksFeature.sidebarEnd();
             ci.cancel();

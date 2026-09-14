@@ -2,7 +2,7 @@ package dev.doorevisuals.mix;
 
 import dev.doorevisuals.App;
 import dev.doorevisuals.core.Feature;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudFeature;
@@ -51,12 +51,12 @@ public abstract class ChatHudMixin {
                     }
                 }
 
-                Nvg.run(
+                Ui.frame(
                     g,
                     () -> {
                         float f4 = hudfeature.editorChromeAlpha();
                         if (!(f4 < 0.02F)) {
-                            Nvg.alpha(f4);
+                            Ui.alpha(f4);
 
                             for (HudSlot hudslot : hudfeature.activeSlots()) {
                                 float[] afloat1 = hudfeature.editorRect(hudslot);
@@ -76,7 +76,7 @@ public abstract class ChatHudMixin {
                                 Theme.alpha(Theme.MUTED, (int)(255.0F * f4)),
                                 8.0F
                             );
-                            Nvg.alpha(1.0F);
+                            Ui.alpha(1.0F);
                         }
                     }
                 );

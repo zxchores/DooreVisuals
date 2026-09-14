@@ -1,6 +1,6 @@
 package dev.doorevisuals.mix;
 
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudTweaksFeature;
@@ -45,7 +45,7 @@ public class BossBarMixin {
     }
 
     private void paintCustom(DrawContext g) {
-        Nvg.run(g, () -> this.paintBars(g));
+        Ui.frame(g, () -> this.paintBars(g));
     }
 
     private void paintBars(DrawContext g) {
@@ -55,7 +55,7 @@ public class BossBarMixin {
             float f1 = 12.0F;
             int i = HudTweaksFeature.bossBarStyle();
             boolean flag = HudTweaksFeature.bossBarHideName();
-            Nvg.push();
+            Ui.push();
 
             for (ClientBossBar clientbossbar : this.bossBars.values()) {
                 float f2 = MathHelper.clamp(clientbossbar.getPercent(), 0.0F, 1.0F);
@@ -95,7 +95,7 @@ public class BossBarMixin {
                 }
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 

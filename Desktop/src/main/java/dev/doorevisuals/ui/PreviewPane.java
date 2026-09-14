@@ -4,6 +4,7 @@ import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.cosmetics.CosmeticsFeature;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.HudFeature;
@@ -57,8 +58,8 @@ public final class PreviewPane {
             paneY = bodyY;
             paneW = f;
             paneH = bodyH;
-            Nvg.push();
-            Nvg.alpha(Math.max(0.0F, alpha * alpha));
+            Ui.push();
+            Ui.alpha(Math.max(0.0F, alpha * alpha));
             Paint.shadow(f2, bodyY, f, bodyH, 16.0F, 12.0F);
             Paint.chromeGui(g, f2, bodyY, f, bodyH, 12.0F * uiScale);
             Paint.text(g, title(feature), f2 + 14.0F * uiScale, bodyY + 12.0F * uiScale, Theme.TEXT, 9.5F * uiScale);
@@ -94,7 +95,7 @@ public final class PreviewPane {
                 Paint.text(g, chinahatfeature.style(), f2 + 14.0F * uiScale, bodyY + bodyH - 16.0F * uiScale, Theme.GHOST, 5.4F * uiScale);
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 

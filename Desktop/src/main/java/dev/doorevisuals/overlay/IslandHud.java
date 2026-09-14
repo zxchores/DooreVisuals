@@ -2,6 +2,7 @@ package dev.doorevisuals.overlay;
 
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.media.CoverArt;
@@ -167,15 +168,15 @@ public final class IslandHud {
                     s5 = s;
                 }
 
-                float f16 = (float)System.currentTimeMillis() * 0.001F;
+                float f16 = Anim.timeSec();
                 float f17 = 0.25F + 0.75F * f;
                 float f18 = 1.0F - Anim.easeInOut(Math.min(1.0F, f11 * 1.55F));
                 float f19 = Anim.easeInOut(Math.max(0.0F, (f11 - 0.18F) / 0.82F));
                 float f20 = f12 * 0.5F;
-                Nvg.push();
-                Nvg.alpha(f17);
-                Nvg.move(f14, f8);
-                Nvg.scale(f7, f7);
+                Ui.push();
+                Ui.alpha(f17);
+                Ui.move(f14, f8);
+                Ui.scale(f7, f7);
                 Paint.glass(g, 0.0F, 0.0F, f13, f12, f20);
                 Paint.outline(g, 0.0F, 0.0F, f13, f12, Theme.alpha(i, 90 + (int)(70.0F * f11)), f20);
                 float f21 = 16.0F + 14.0F * f11;
@@ -195,24 +196,24 @@ public final class IslandHud {
                 }
 
                 if (f18 > 0.04F) {
-                    Nvg.alpha(f17 * f18);
+                    Ui.alpha(f17 * f18);
                     float f36 = f22 + f21 + 7.0F;
                     float f26 = f13 - f36 - 28.0F;
                     float f27 = (f3 - 8.0F) * 0.5F;
-                    Nvg.scissor(f36, 3.0F, Math.max(8.0F, f26), f3 - 6.0F);
+                    Ui.scissor(f36, 3.0F, Math.max(8.0F, f26), f3 - 6.0F);
 
                     try {
                         float f28 = Nvg.width(s5, 6.8F);
                         if (f28 > f26) {
                             float f29 = f28 + 24.0F;
-                            float f30 = (float)System.currentTimeMillis() / 28.0F % f29;
+                            float f30 = f16 * 35.7F % f29;
                             Paint.text(g, s5, f36 - f30, f27, Theme.TEXT, 6.8F);
                             Paint.text(g, s5, f36 - f30 + f29, f27, Theme.TEXT, 6.8F);
                         } else {
                             Paint.text(g, s5, f36, f27, Theme.TEXT, 6.8F);
                         }
                     } finally {
-                        Nvg.unscissor();
+                        Ui.unscissor();
                     }
 
                     float f40 = f13 - 26.0F;
@@ -225,11 +226,11 @@ public final class IslandHud {
                         Paint.box(g, f40 + j * 5.0F, 6.0F + (12.0F - f31), 2.3F, f31, Theme.alpha(i, 200), 1.0F);
                     }
 
-                    Nvg.alpha(f17);
+                    Ui.alpha(f17);
                 }
 
                 if (f19 > 0.04F) {
-                    Nvg.alpha(f17 * f19);
+                    Ui.alpha(f17 * f19);
                     float f37 = f22 + f21 + 9.0F;
                     Paint.text(g, trim(s1, 24), f37, 8.0F, Theme.TEXT, 7.6F);
                     if (!s2.isEmpty()) {
@@ -268,10 +269,10 @@ public final class IslandHud {
                     this.nextY = screen(f8, f42, f7);
                     this.btnW = f44 * f7;
                     this.btnH = f45 * f7;
-                    Nvg.alpha(f17);
+                    Ui.alpha(f17);
                 }
 
-                Nvg.pop();
+                Ui.pop();
                 this.bodyX = f14;
                 this.bodyY = f8;
                 this.bodyW = f13 * f7;

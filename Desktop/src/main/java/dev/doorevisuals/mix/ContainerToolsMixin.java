@@ -2,7 +2,7 @@ package dev.doorevisuals.mix;
 
 import dev.doorevisuals.App;
 import dev.doorevisuals.core.Feature;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.server.AhHelperFeature;
@@ -42,7 +42,7 @@ public abstract class ContainerToolsMixin {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             HandledScreen<?> handledscreen = (HandledScreen<?>)(Object)this;
             if (!(handledscreen instanceof CreativeInventoryScreen)) {
-                Nvg.run(
+                Ui.frame(
                     g,
                     () -> {
                         if (this.doore$storage(handledscreen)) {

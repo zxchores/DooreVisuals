@@ -1,7 +1,7 @@
 package dev.doorevisuals.ui;
 
 import dev.doorevisuals.App;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.overlay.DeathRecap;
@@ -63,7 +63,7 @@ public final class DooreDeathScreen extends DeathScreen {
         this.mx = mouseX;
         this.my = mouseY;
         this.hits.clear();
-        Nvg.run(g, () -> {
+        Ui.frame(g, () -> {
             float f = this.width * 0.5F;
             float f1 = Math.min(340, this.width - 40);
             float f2 = 228.0F;

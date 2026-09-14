@@ -7,6 +7,7 @@ import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Sprites;
 import dev.doorevisuals.draw.Theme;
@@ -769,9 +770,9 @@ public final class HudFeature extends Feature {
         float[] afloat = this.slotPos(hudslot, f9, f, mc);
         float f10 = Math.max(0.01F, hudslot.scale());
         int j = this.hudAccent();
-        Nvg.push();
-        Nvg.move(afloat[0], afloat[1]);
-        Nvg.scale(f10, f10);
+        Ui.push();
+        Ui.move(afloat[0], afloat[1]);
+        Ui.scale(f10, f10);
         Paint.box(g, 0.0F, 0.0F, f9, f, Theme.alpha(526862, 236), f1);
         Paint.outline(g, 0.0F, 0.0F, f9, f, Theme.alpha(16777215, 16), f1);
         float f11 = f5 + f6;
@@ -790,7 +791,7 @@ public final class HudFeature extends Feature {
         Nvg.circle(f12 + 14.0F, f * 0.5F, 4.2F, Theme.alpha(j, 40));
         Nvg.ring(f12 + 10.2F, f * 0.5F - 3.8F, 7.6F, 7.6F, 1.15F, Theme.alpha(16777215, 210), 3.8F);
         Paint.text(g, s2, f12 + 22.0F, (f - f4) * 0.5F, Theme.TEXT, f4);
-        Nvg.pop();
+        Ui.pop();
         this.watermarkIconS = Math.max(8, Math.round((f3 - 1.2F) * f10));
         this.watermarkIconX = Math.round(screen(afloat[0], 8.4F, f10));
         this.watermarkIconY = Math.round(screen(afloat[1], 5.4F, f10));
@@ -822,15 +823,15 @@ public final class HudFeature extends Feature {
         float[] afloat = this.slotPos(hudslot, f1, f2, mc);
         int i = this.hudAccent();
         int j = f >= 19.4F ? Theme.OK : (f >= 15.0F ? Theme.WARN : Theme.BAD);
-        Nvg.push();
-        Nvg.move(afloat[0], afloat[1]);
-        Nvg.scale(hudslot.scale(), hudslot.scale());
+        Ui.push();
+        Ui.move(afloat[0], afloat[1]);
+        Ui.scale(hudslot.scale(), hudslot.scale());
         this.hudPlate(g, f1, f2, i);
         Nvg.circle(12.0F, 11.0F, 2.4F, j);
         Paint.text(g, s, 18.0F, 6.5F, j, 8.0F);
         Paint.textR(g, s2 + "  " + s3, f1 - 8.0F, 7.2F, Theme.MUTED, 6.4F);
         Paint.text(g, s1, 10.0F, 18.5F, Theme.alpha(16777215, 190), 7.2F);
-        Nvg.pop();
+        Ui.pop();
     }
 
     private static String worldClock(MinecraftClient mc) {
@@ -856,9 +857,9 @@ public final class HudFeature extends Feature {
         float[] afloat = this.slotPos(hudslot, hudslot.w(), hudslot.h(), mc);
         GameOptions gameoptions = mc.options;
         int i = this.hudAccent();
-        Nvg.push();
-        Nvg.move(afloat[0], afloat[1]);
-        Nvg.scale(hudslot.scale(), hudslot.scale());
+        Ui.push();
+        Ui.move(afloat[0], afloat[1]);
+        Ui.scale(hudslot.scale(), hudslot.scale());
         this.hudPlate(g, f2, f3, i);
         float f4 = 5.0F;
         float f5 = 4.0F;
@@ -871,7 +872,7 @@ public final class HudFeature extends Feature {
             cap(g, f4 + (f + f1) * 2.0F, f5 + (f + f1) * 2.0F, "R", gameoptions.useKey.isPressed(), this.keyAnims[5], i, f);
         }
 
-        Nvg.pop();
+        Ui.pop();
     }
 
     private static void cap(DrawContext g, float x, float y, String label, boolean down, Anim anim, int accent, float size) {
@@ -924,9 +925,9 @@ public final class HudFeature extends Feature {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             float[] afloat = this.slotPos(hudslot, hudslot.w(), hudslot.h(), minecraftclient);
             int k = this.hudAccent();
-            Nvg.push();
-            Nvg.move(afloat[0], afloat[1]);
-            Nvg.scale(hudslot.scale(), hudslot.scale());
+            Ui.push();
+            Ui.move(afloat[0], afloat[1]);
+            Ui.scale(hudslot.scale(), hudslot.scale());
             this.hudPlate(g, hudslot.w(), hudslot.h(), k);
             int l = 0;
 
@@ -950,7 +951,7 @@ public final class HudFeature extends Feature {
                 }
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 
@@ -972,9 +973,9 @@ public final class HudFeature extends Feature {
             float[] afloat = this.slotPos(hudslot, f2, f5, mc);
             int i = this.hudAccent();
             float f3 = Math.max(0.01F, hudslot.scale());
-            Nvg.push();
-            Nvg.move(afloat[0], afloat[1]);
-            Nvg.scale(f3, f3);
+            Ui.push();
+            Ui.move(afloat[0], afloat[1]);
+            Ui.scale(f3, f3);
             this.hudPlate(g, f2, f5, i);
             float f4 = 4.0F;
             if (this.effectRows.isEmpty()) {
@@ -999,7 +1000,7 @@ public final class HudFeature extends Feature {
                 }
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 
@@ -1011,9 +1012,9 @@ public final class HudFeature extends Feature {
         float f1 = 24.0F;
         hudslot.size(f, f1);
         float[] afloat = this.slotPos(hudslot, f, f1, mc);
-        Nvg.push();
-        Nvg.move(afloat[0], afloat[1]);
-        Nvg.scale(hudslot.scale(), hudslot.scale());
+        Ui.push();
+        Ui.move(afloat[0], afloat[1]);
+        Ui.scale(hudslot.scale(), hudslot.scale());
         this.hudPlate(g, f, f1, this.hudAccent());
 
         for (int j = 0; j < i; j++) {
@@ -1030,7 +1031,7 @@ public final class HudFeature extends Feature {
             }
         }
 
-        Nvg.pop();
+        Ui.pop();
         this.cdIconX = Math.round(afloat[0]);
         this.cdIconY = Math.round(afloat[1]);
         this.cdIconS = hudslot.scale();
@@ -1086,12 +1087,12 @@ public final class HudFeature extends Feature {
                 hudslot.size(f, f1);
                 float[] afloat = this.slotPos(hudslot, f, f1, mc);
                 int i = this.hudAccent();
-                Nvg.push();
-                Nvg.move(afloat[0], afloat[1]);
-                Nvg.scale(hudslot.scale(), hudslot.scale());
+                Ui.push();
+                Ui.move(afloat[0], afloat[1]);
+                Ui.scale(hudslot.scale(), hudslot.scale());
                 this.hudPlate(g, f, f1, i);
                 Paint.text(g, s, 8.0F, 5.2F, Theme.ACCENT_HOT, 6.6F);
-                Nvg.pop();
+                Ui.pop();
             }
         }
     }
@@ -1131,12 +1132,12 @@ public final class HudFeature extends Feature {
             int i = f1 < 0.3F ? Theme.BAD : (f1 < 0.55F ? Theme.WARN : this.hudAccent());
             boolean flag1 = "\u0421\u0435\u0440\u0434\u0446\u0430".equals(this.hpMode.get());
             float f8 = Math.max(0.01F, hudslot.scale());
-            Nvg.push();
+            Ui.push();
 
             try {
-                Nvg.alpha(f);
-                Nvg.move(f6, f7);
-                Nvg.scale(f8, f8);
+                Ui.alpha(f);
+                Ui.move(f6, f7);
+                Ui.scale(f8, f8);
                 this.hudPlate(g, f4, f5, i);
                 Paint.box(g, 6.0F, 6.0F, f3, f3, Theme.alpha(329483, 240), 8.0F);
                 Paint.text(g, s, f3 + 14.0F, 7.0F, Theme.TEXT, 8.6F);
@@ -1157,7 +1158,7 @@ public final class HudFeature extends Feature {
                     Paint.text(g, s2, f3 + 14.0F, 35.0F, Theme.MUTED, 6.2F);
                 }
             } finally {
-                Nvg.pop();
+                Ui.pop();
             }
 
             this.targetHeadS = Math.round(f3 * f8);
@@ -1176,11 +1177,11 @@ public final class HudFeature extends Feature {
         MinecraftClient minecraftclient = MinecraftClient.getInstance();
         float[] afloat = this.slotPos(hudslot, hudslot.w(), hudslot.h(), minecraftclient);
         int i = this.hudAccent();
-        Nvg.push();
+        Ui.push();
 
         try {
-            Nvg.move(afloat[0], afloat[1]);
-            Nvg.scale(hudslot.scale(), hudslot.scale());
+            Ui.move(afloat[0], afloat[1]);
+            Ui.scale(hudslot.scale(), hudslot.scale());
             this.hudPlate(g, hudslot.w(), hudslot.h(), i);
 
             for (int j = 0; j < 3; j++) {
@@ -1193,7 +1194,7 @@ public final class HudFeature extends Feature {
                 Paint.box(g, 4 + l * 18, 62, 16, 16, Theme.alpha(i, 18), 3.0F);
             }
         } finally {
-            Nvg.pop();
+            Ui.pop();
         }
     }
 
@@ -1226,9 +1227,9 @@ public final class HudFeature extends Feature {
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
             float[] afloat = this.slotPos(hudslot, hudslot.w(), hudslot.h(), minecraftclient);
             int l = this.hudAccent();
-            Nvg.push();
-            Nvg.move(afloat[0], afloat[1]);
-            Nvg.scale(hudslot.scale(), hudslot.scale());
+            Ui.push();
+            Ui.move(afloat[0], afloat[1]);
+            Ui.scale(hudslot.scale(), hudslot.scale());
             float f2 = 0.0F;
             if (this.notes.isEmpty()) {
                 this.hudPlate(g, 180.0F, 32.0F, l);
@@ -1251,9 +1252,9 @@ public final class HudFeature extends Feature {
                         case BAD -> Theme.BAD;
                         default -> l;
                     };
-                    Nvg.push();
-                    Nvg.alpha(f7);
-                    Nvg.move(f5, 0.0F);
+                    Ui.push();
+                    Ui.alpha(f7);
+                    Ui.move(f5, 0.0F);
                     Paint.box(g, 0.0F, f2, 180.0F, 26.0F, Theme.alpha(461583, 230), 8.0F);
                     Paint.outline(g, 0.0F, f2, 180.0F, 26.0F, Theme.alpha(16777215, 18), 8.0F);
                     Paint.box(g, 0.0F, f2 + 5.0F, 2.4F, 16.0F, l1, 1.2F);
@@ -1261,12 +1262,12 @@ public final class HudFeature extends Feature {
                     Paint.box(g, 0.0F, f2 + 24.4F, f8, 1.6F, Theme.alpha(l1, 180), 0.0F);
                     Paint.text(g, hudfeature$note.title, 12.0F, f2 + 4.0F, Theme.TEXT, 7.6F);
                     Paint.text(g, hudfeature$note.body, 12.0F, f2 + 14.0F, Theme.MUTED, 6.4F);
-                    Nvg.pop();
+                    Ui.pop();
                     f2 += f;
                 }
             }
 
-            Nvg.pop();
+            Ui.pop();
         }
     }
 

@@ -2,7 +2,7 @@ package dev.doorevisuals.overlay;
 
 import dev.doorevisuals.App;
 import dev.doorevisuals.core.Feature;
-import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.tools.AspectFeature;
 import dev.doorevisuals.tools.ContainerChrome;
 import dev.doorevisuals.tools.CrosshairFeature;
@@ -33,7 +33,7 @@ public final class OverlayPipe {
             if (!shouldHideHud(minecraftclient)) {
                 try {
                     App.features().find(AspectFeature.class).filter(Feature::on).ifPresent(f -> f.paintBars(g, dt));
-                    Nvg.run(g, () -> {
+                    Ui.frame(g, () -> {
                         App.features().find(HudFeature.class).filter(Feature::on).ifPresent(hud -> {
                             try {
                                 hud.paint(g, dt);

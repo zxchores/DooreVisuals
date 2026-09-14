@@ -5,6 +5,7 @@ import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Nvg;
+import dev.doorevisuals.draw.Ui;
 import dev.doorevisuals.draw.Paint;
 import dev.doorevisuals.draw.Theme;
 import dev.doorevisuals.tools.ItemHighlightFeature;
@@ -121,9 +122,9 @@ public final class HotbarFeature extends Feature {
             float f15 = this.trailX.value();
             float f16 = this.selectGlow.value();
             Runnable runnable = () -> {
-                Nvg.push();
-                Nvg.scale(f, f);
-                Nvg.move(f8, f9);
+                Ui.push();
+                Ui.scale(f, f);
+                Ui.move(f8, f9);
                 Paint.hudBar(g, 0.0F, 0.0F, f4, f5, 5.0F);
                 if (Math.abs(f15 - f11) > 0.5F) {
                     Paint.box(g, f15, f3, f1, f1, Theme.alpha(j, 36), 4.0F);
@@ -155,7 +156,7 @@ public final class HotbarFeature extends Feature {
                     }
                 }
 
-                Nvg.pop();
+                Ui.pop();
             };
             this.cachedX0 = f8;
             this.cachedY0 = f9;
@@ -171,7 +172,7 @@ public final class HotbarFeature extends Feature {
             if (Nvg.frame()) {
                 runnable.run();
             } else {
-                Nvg.run(g, runnable);
+                Ui.frame(g, runnable);
             }
         }
     }
@@ -235,7 +236,7 @@ public final class HotbarFeature extends Feature {
 
             return switch (s) {
                 case "\u041f\u0440\u044b\u0436\u043e\u043a" -> 0.1F * bounce;
-                case "\u041f\u0443\u043b\u044c\u0441" -> 0.04F + 0.03F * (0.5F + 0.5F * MathHelper.sin((float)System.currentTimeMillis() * 0.012F));
+                case "\u041f\u0443\u043b\u044c\u0441" -> 0.04F + 0.03F * (0.5F + 0.5F * MathHelper.sin(Anim.timeSec() * 12.0F));
                 case "\u0421\u043a\u043e\u043b\u044c\u0436\u0435\u043d\u0438\u0435" -> 0.05F * pop;
                 default -> 0.08F * Anim.easeOut(pop);
             };
