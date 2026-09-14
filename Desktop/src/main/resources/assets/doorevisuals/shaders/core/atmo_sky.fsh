@@ -17,8 +17,8 @@ vec3 sunDirection(vec2 params, out float sunUp, out float ownDiscs) {
     ownDiscs = step(1.5, params.y);
     sunUp = (params.y - ownDiscs * 2.0) * 2.0 - 1.0;
     float az = params.x * 6.2831853;
-    float flat = sqrt(max(0.0, 1.0 - sunUp * sunUp));
-    return normalize(vec3(cos(az) * flat, sunUp, sin(az) * flat));
+    float radial = sqrt(max(0.0, 1.0 - sunUp * sunUp));
+    return normalize(vec3(cos(az) * radial, sunUp, sin(az) * radial));
 }
 
 void main() {
