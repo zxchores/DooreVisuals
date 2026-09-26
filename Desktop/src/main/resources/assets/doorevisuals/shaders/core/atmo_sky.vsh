@@ -5,16 +5,16 @@
 #moj_import <minecraft:globals.glsl>
 
 in vec3 Position;
+in vec2 UV0;
 in vec4 Color;
 
 out vec4 vertexColor;
-out vec3 viewPos;
 out vec3 localPos;
+out vec2 sunParams;
 
 void main() {
     localPos = Position;
-    vec4 view = ModelViewMat * vec4(Position, 1.0);
-    viewPos = view.xyz;
-    gl_Position = ProjMat * view;
+    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
     vertexColor = Color;
+    sunParams = UV0;
 }

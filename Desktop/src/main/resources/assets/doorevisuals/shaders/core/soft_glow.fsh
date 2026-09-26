@@ -18,6 +18,9 @@ void main() {
     float pulse = doore_pulse(GameTime * 2800.0 + localPos.y * 2.0, 1.0, 0.28);
     float rim = 0.85 + 0.35 * sin(GameTime * 1600.0 - length(viewPos.xy) * 0.4);
     float bloom = 1.2 + color.a * 0.95;
-    vec3 boosted = color.rgb * bloom * pulse * rim;
-    fragColor = vec4(boosted, color.a) * ColorModulator;
+    // Same reasoning as esp_glow: the boost easily exceeds one, so it is rolled off in linear light.
+    vec3 boosted = doore_toLinear(color.rgb) * bloom * pulse * rim;
+    vec3 rgb = doore_toSrgb(doore_tonemap(boosted));
+    rgb += doore_dither(gl_FragCoord.xy);
+    fragColor = vec4(rgb, color.a) * ColorModulator;
 }
