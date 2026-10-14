@@ -1,0 +1,50 @@
+{
+	"gui_open": {
+		"sounds": ["doorevisuals:gui_open"]
+	},
+	"gui_close": {
+		"sounds": ["doorevisuals:gui_close"]
+	},
+	"gui_on": {
+		"sounds": ["doorevisuals:gui_on"]
+	},
+	"gui_off": {
+		"sounds": ["doorevisuals:gui_off"]
+	},
+	"gui_click": {
+		"sounds": ["doorevisuals:gui_click"]
+	},
+	"hit_click": {
+		"sounds": ["doorevisuals:hit_click"]
+	},
+	"hit_thud": {
+		"sounds": ["doorevisuals:hit_thud"]
+	},
+	"hit_crystal": {
+		"sounds": ["doorevisuals:hit_crystal"]
+	},
+	"hit_blip": {
+		"sounds": ["doorevisuals:hit_blip"]
+	},
+	"hit_pop": {
+		"sounds": ["doorevisuals:hit_pop"]
+	},
+	"hit_snap": {
+		"sounds": ["doorevisuals:hit_snap"]
+	},
+	"hit_knock": {
+		"sounds": ["doorevisuals:hit_knock"]
+	},
+	"hit_tick": {
+		"sounds": ["doorevisuals:hit_tick"]
+	},
+	"hit_bem": {
+		"sounds": ["doorevisuals:hit_bem"]
+	},
+	"kill_boom": {
+		"sounds": ["doorevisuals:kill_boom"]
+	},
+	"totem_mell": {
+		"sounds": ["doorevisuals:totem_mell"]
+	}
+}

@@ -1,0 +1,85 @@
+{
+    "targets": {
+        "bright": {},
+        "swap": {}
+    },
+    "passes": [
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "doorevisuals:post/bloom_bright",
+            "inputs": [
+                {
+                    "sampler_name": "In",
+                    "target": "minecraft:main",
+                    "bilinear": true
+                }
+            ],
+            "output": "bright",
+            "uniforms": {
+                "BrightConfig": [
+                    { "name": "Threshold", "type": "float", "value": 0.74 },
+                    { "name": "Knee", "type": "float", "value": 0.18 }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "doorevisuals:post/bloom_blur",
+            "inputs": [
+                { "sampler_name": "In", "target": "bright", "bilinear": true }
+            ],
+            "output": "swap",
+            "uniforms": {
+                "BlurConfig": [
+                    { "name": "BlurDir", "type": "vec2", "value": [ 1.0, 0.0 ] },
+                    { "name": "Radius", "type": "float", "value": 2.5 }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "doorevisuals:post/bloom_blur",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap", "bilinear": true }
+            ],
+            "output": "bright",
+            "uniforms": {
+                "BlurConfig": [
+                    { "name": "BlurDir", "type": "vec2", "value": [ 0.0, 1.0 ] },
+                    { "name": "Radius", "type": "float", "value": 2.5 }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "doorevisuals:post/bloom_composite",
+            "inputs": [
+                { "sampler_name": "In", "target": "minecraft:main" },
+                { "sampler_name": "Bloom", "target": "bright", "bilinear": true }
+            ],
+            "output": "swap",
+            "uniforms": {
+                "CompositeConfig": [
+                    { "name": "BloomStrength", "type": "float", "value": 0.55 },
+                    { "name": "Contrast", "type": "float", "value": 1.045 },
+                    { "name": "Saturation", "type": "float", "value": 1.06 },
+                    { "name": "Vignette", "type": "float", "value": 0.16 },
+                    { "name": "Grain", "type": "float", "value": 0.012 }
+                ]
+            }
+        },
+        {
+            "vertex_shader": "minecraft:core/screenquad",
+            "fragment_shader": "minecraft:post/blit",
+            "inputs": [
+                { "sampler_name": "In", "target": "swap" }
+            ],
+            "output": "minecraft:main",
+            "uniforms": {
+                "BlitConfig": [
+                    { "name": "ColorModulate", "type": "vec4", "value": [ 1.0, 1.0, 1.0, 1.0 ] }
+                ]
+            }
+        }
+    ]
+}
