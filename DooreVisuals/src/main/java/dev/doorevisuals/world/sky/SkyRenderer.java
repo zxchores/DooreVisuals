@@ -50,6 +50,7 @@ public final class SkyRenderer {
         MatrixStack matrixstack = ctx.matrices();
         VertexConsumerProvider vertexconsumerprovider = ctx.consumers();
         if (matrixstack != null && vertexconsumerprovider != null && radius > 1.0) {
+            MoonTexture.update(AtmosphereFeature.moonSkin(), AtmosphereFeature.moonFile());
             this.rebuild(Math.max(12, VisualQuality.segs(20)), Math.max(10, VisualQuality.segs(16)));
             this.shade(palette);
             Entry entry = matrixstack.peek();

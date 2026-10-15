@@ -132,9 +132,9 @@ public final class HitFxFeature extends Feature implements Tick {
                 hitfxfeature$p.size = (0.12F + threadlocalrandom.nextFloat() * 0.14F) * f;
             } else if ("\u0421\u0435\u0440\u0434\u0435\u0447\u043a\u0438".equals(s)) {
                 hitfxfeature$p.digit = false;
-                hitfxfeature$p.tex = Sprites.HEART;
                 hitfxfeature$p.size = (0.1F + threadlocalrandom.nextFloat() * 0.1F) * f;
-                hitfxfeature$p.grav = -0.05F;
+                hitfxfeature$p.tex = Sprites.HEART_SOFT;
+                hitfxfeature$p.grav = 0.012F;
             } else if ("\u0417\u0432\u0451\u0437\u0434\u043e\u0447\u043a\u0438".equals(s)) {
                 hitfxfeature$p.digit = false;
                 hitfxfeature$p.tex = Sprites.STAR;

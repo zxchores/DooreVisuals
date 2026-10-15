@@ -1,0 +1,9 @@
+Knife models "Бабочка (3D)", "М9 (3D)" and "Стилет (3D)" in Custom Sword are converted from Sketchfab models
+(mesh to cuboids, textures reduced to a colour palette). All are licensed under CC-BY-4.0
+(http://creativecommons.org/licenses/by/4.0/).
+
+This work is based on "Balisong butterfly-knife" (https://sketchfab.com/3d-models/balisong-butterfly-knife-62abd7e1bbd54cb191eedd92b7367172) by martiangold (https://sketchfab.com/martiangold) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+This work is based on "M9 Bayonet" (https://sketchfab.com/3d-models/m9-bayonet-d033873c3dd84f11abaeaff8fb5ea6da) by sh4m4n (https://sketchfab.com/sh4m4n) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+This work is based on "Stiletto Knife" (https://sketchfab.com/3d-models/stiletto-knife-9e5073a605db4884826ea78acc3ad3a0) by komov (https://sketchfab.com/komov) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

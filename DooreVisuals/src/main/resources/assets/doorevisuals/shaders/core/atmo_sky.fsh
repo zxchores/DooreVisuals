@@ -4,6 +4,9 @@
 #moj_import <minecraft:globals.glsl>
 #moj_import <doorevisuals:fx.glsl>
 
+// The surface of the moon: its alpha says whether the texture is used (0: the procedural surface below).
+uniform sampler2D Sampler0;
+
 in vec4 vertexColor;
 in vec3 localPos;
 in vec2 sunParams;
@@ -202,6 +205,8 @@ void main() {
         float maria = smoothstep(0.50, 0.62, doore_fbm(q * 1.7 + 3.1));
         float craters = doore_fbm(q * 7.0 + 11.0);
         float albedo = 0.88 - 0.38 * maria + 0.10 * (craters - 0.5);
+        vec4 surface = textureLod(Sampler0, vec2(q.x, -q.y) * 0.5 + 0.5, 0.0);
+        albedo = mix(albedo, dot(surface.rgb, vec3(0.299, 0.587, 0.114)) * 1.05, surface.a);
         float limb = pow(max(zq, 0.0), 0.28);
         // A sliver of earthshine keeps a new moon from turning into a black hole in the sky.
         float moonLight = moonMask * (0.07 * limb + lambert * albedo * limb) * (1.0 - 0.9 * clouds);

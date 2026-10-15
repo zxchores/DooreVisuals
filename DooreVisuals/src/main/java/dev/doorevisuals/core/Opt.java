@@ -168,10 +168,21 @@ public abstract class Opt<T> {
 
     public static final class Pick extends Opt<String> {
         private final List<String> options;
+        private boolean chips;
 
         public Pick(String id, String label, String seed, String... options) {
             super(id, label, seed);
             this.options = new ArrayList<>(List.of(options));
+        }
+
+        /** Menus show the choices as a grid of small buttons instead of a drop-down list. */
+        public Pick chips() {
+            this.chips = true;
+            return this;
+        }
+
+        public boolean isChips() {
+            return this.chips;
         }
 
         public List<String> options() {

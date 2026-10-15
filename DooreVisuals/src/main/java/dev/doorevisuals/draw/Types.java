@@ -20,7 +20,8 @@ public final class Types {
     private static final RenderLayer SCAN = sorted("dv3_scan", Gpu.SCAN_PIPE);
     private static final RenderLayer GHOST = sorted("dv3_ghost", Gpu.GHOST_PIPE);
     private static final RenderLayer ORB = sorted("dv3_orb", Gpu.ORB_PIPE);
-    private static final RenderLayer SKY = sorted("dv3_sky", Gpu.SKY_PIPE);
+    private static final RenderLayer SKY = RenderLayer.of("dv3_sky", RenderSetup.builder(Gpu.SKY_PIPE)
+        .texture("Sampler0", dev.doorevisuals.world.sky.MoonTexture.ID).translucent().build());
     private static final RenderLayer CLOUD = sorted("dv3_cloud", Gpu.CLOUD_PIPE);
     private static final RenderLayer AURORA = sorted("dv3_aurora", Gpu.AURORA_PIPE);
     private static final RenderLayer LINES = RenderLayer.of("dv3_lines", RenderSetup.builder(RenderPipelines.LINES).build());
@@ -29,6 +30,7 @@ public final class Types {
     );
 
     private static final Map<String, RenderLayer> HAND_SURFACES = new ConcurrentHashMap<>();
+    private static final Map<String, RenderLayer> HAND_WAVES = new ConcurrentHashMap<>();
 
     private Types() {
     }
@@ -65,6 +67,25 @@ public final class Types {
                 RenderSetup.builder(Gpu.handSurfacePipe(style))
                     .texture("Sampler0", texture)
                     .texture("Sampler1", AccentTexture.ID)
+                    .translucent()
+                    .build()
+            )
+        );
+    }
+
+    /** The Hand Shader waves over the given skin (the mask). */
+    public static RenderLayer handWave(int style, Identifier texture) {
+        return handWave(style, texture, false);
+    }
+
+    /** The waves over a texture used as the mask: the skin for the hand, the atlas of the item for the item in the hand. */
+    public static RenderLayer handWave(int style, Identifier texture, boolean item) {
+        return HAND_WAVES.computeIfAbsent(
+            style + "|" + item + "|" + texture,
+            key -> RenderLayer.of(
+                "dv3_hand_wave_" + style + (item ? "_item_" : "_") + texture.getPath().replace('/', '_'),
+                RenderSetup.builder(Gpu.handWavePipe(style, item))
+                    .texture("Sampler0", texture)
                     .translucent()
                     .build()
             )

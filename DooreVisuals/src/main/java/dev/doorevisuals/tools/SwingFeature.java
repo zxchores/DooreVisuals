@@ -1,97 +1,94 @@
 package dev.doorevisuals.tools;
 
+import dev.doorevisuals.core.Badge;
 import dev.doorevisuals.core.Category;
 import dev.doorevisuals.core.Feature;
 import dev.doorevisuals.core.Opt;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.MathHelper;
 
+/**
+ * Swing Animations: replaces the first-person swing of the hand with one of eleven own animations (the poses are in
+ * {@link SwingAnimations}). Strength scales the angles and the reach, speed shortens or lengthens the swing itself.
+ * The values are read again whenever an option changes, so nothing needs a restart.
+ */
 public final class SwingFeature extends Feature {
-    private static volatile boolean active;
-    private static volatile String style = "\u0420\u0435\u0436\u0438\u043c 1";
-    private static volatile float power = 1.0F;
-    private static volatile float strength = 20.0F;
-    private final Opt.Pick mode = this.opt(
-        new Opt.Pick(
-            "style",
-            "\u0421\u0442\u0438\u043b\u044c",
-            "\u0420\u0435\u0436\u0438\u043c 1",
-            "\u0420\u0435\u0436\u0438\u043c 1",
-            "\u0420\u0435\u0436\u0438\u043c 2",
-            "\u0420\u0435\u0436\u0438\u043c 3",
-            "\u0420\u0435\u0436\u0438\u043c 4",
-            "\u0420\u0435\u0436\u0438\u043c 5",
-            "\u041a\u043b\u0430\u0441\u0441\u0438\u043a\u0430",
-            "\u041f\u043b\u0430\u0432\u043d\u044b\u0439",
-            "\u0420\u0435\u0437\u043a\u0438\u0439",
-            "\u041a\u0440\u0443\u0433\u043e\u0432\u043e\u0439",
-            "\u0421\u0442\u0438\u043b\u0435\u0442",
-            "\u0422\u044f\u0436\u0451\u043b\u044b\u0439",
-            "\u0425\u0443\u043a",
-            "\u0421\u0442\u0430\u0442\u0438\u0447\u043d\u044b\u0439"
-        )
-    );
-    private final Opt.Num strengthOpt = this.opt(new Opt.Num("power", "\u0421\u0438\u043b\u0430", 20.0, 20.0, 75.0, 1.0));
+    private static final float BASE_SPEED = 6.0F;
+
+    private static SwingFeature self;
+
+    private final Opt.Pick typeOpt = this.opt(
+            new Opt.Pick("type", "Type", "Mod 1", SwingAnimations.TYPES.toArray(new String[0])).chips());
+    private final Opt.Num strengthOpt = this.opt(new Opt.Num("strength", "Swing Strength", 3.0, 0.0, 6.0, 0.1));
+    private final Opt.Num speedOpt = this.opt(new Opt.Num("speed", "Swing Speed", 6.0, 1.0, 10.0, 0.5));
+    private final Opt.Flag smoothOpt = this.opt(new Opt.Flag("smooth", "Smooth Animation", true));
+    private final Opt.Flag swordsOpt = this.opt(new Opt.Flag("only_swords", "Only Swords", false));
 
     public SwingFeature() {
         super(
-            "swing",
-            "\u0410\u043d\u0438\u043c\u0430\u0446\u0438\u044f \u0443\u0434\u0430\u0440\u0430",
-            "\u0410\u043d\u0438\u043c\u0430\u0446\u0438\u0438 \u0443\u0434\u0430\u0440\u0430 \u2014 5 \u0440\u0435\u0436\u0438\u043c\u043e\u0432 \u0438 \u0441\u0432\u043e\u0438 \u0441\u0442\u0438\u043b\u0438",
-            Category.TOOLS,
-            true
+                "swing",
+                "Swing Animations",
+                "Свои анимации взмаха от первого лица: 11 режимов, сила и скорость",
+                Category.TOOLS,
+                true
         );
+        this.badge(Badge.NEW);
+        self = this;
     }
 
+    // The values are read from the options on every call, so a change in the menu is visible on the next frame.
+
+    /** True while the module is on and a custom type is chosen; with Vanilla the game's own swing is untouched. */
     public static boolean active() {
-        return active;
+        SwingFeature f = self;
+        return f != null && f.on() && SwingAnimations.custom(f.typeOpt.get());
     }
 
-    public static String style() {
-        return style;
-    }
-
-    public static float power() {
-        return power;
+    public static String type() {
+        SwingFeature f = self;
+        return f == null ? SwingAnimations.VANILLA : f.typeOpt.get();
     }
 
     public static float strength() {
-        return strength;
+        SwingFeature f = self;
+        return f == null ? 0.0F : MathHelper.clamp(f.strengthOpt.f(), 0.0F, 6.0F);
     }
 
-    public static boolean staticSwing() {
-        return active && "\u0421\u0442\u0430\u0442\u0438\u0447\u043d\u044b\u0439".equals(style);
+    public static boolean onlySwords() {
+        SwingFeature f = self;
+        return f != null && f.swordsOpt.get();
     }
 
-    public static boolean isPlusStyle() {
-        return style != null && style.startsWith("\u0420\u0435\u0436\u0438\u043c");
-    }
-
-    public static boolean suppressVanilla() {
-        return active;
-    }
-
-    @Override
-    protected void enable() {
-        active = true;
-        this.pull();
-    }
-
-    @Override
-    protected void disable() {
-        active = false;
-    }
-
-    @Override
-    public void poke() {
-        super.poke();
-        if (this.on()) {
-            this.pull();
+    /** Whether the swing of the hand holding this stack is replaced (an empty hand is not a sword). */
+    public static boolean appliesTo(ItemStack stack) {
+        if (!active()) {
+            return false;
         }
+        return !onlySwords() || (stack != null && !stack.isEmpty() && stack.isIn(ItemTags.SWORDS));
     }
 
-    private void pull() {
-        style = (String)this.mode.get();
-        strength = MathHelper.clamp(this.strengthOpt.f(), 20.0F, 75.0F);
-        power = MathHelper.clamp(0.4F + (strength - 20.0F) / 55.0F * 1.8F, 0.4F, 2.2F);
+    /** The progress handed to the pose: the game's linear progress, eased a little when Smooth Animation is on. */
+    public static float shape(float progress) {
+        float p = MathHelper.clamp(progress, 0.0F, 1.0F);
+        SwingFeature f = self;
+        if (f == null || !f.smoothOpt.get()) {
+            return p;
+        }
+        float eased = p * p * p * (p * (p * 6.0F - 15.0F) + 10.0F);
+        return p + (eased - p) * 0.6F;
+    }
+
+    /**
+     * How much longer or shorter the swing lasts than in the game: 1 at the default speed, below 1 when faster. A
+     * soft power law, so the slowest setting is about four times slower and the fastest about 1.5 times quicker.
+     */
+    public static float durationScale() {
+        SwingFeature f = self;
+        if (!active() || f == null) {
+            return 1.0F;
+        }
+        float speed = MathHelper.clamp(f.speedOpt.f(), 1.0F, 10.0F);
+        return (float)Math.pow(BASE_SPEED / speed, 0.75);
     }
 }

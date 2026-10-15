@@ -92,8 +92,11 @@ public final class KillFxFeature extends Feature implements Tick {
                     LivingEntity livingentity = killfxfeature$watch.target;
                     if (livingentity == null) {
                         iterator.remove();
-                    } else if (!livingentity.isAlive() || livingentity.isRemoved()) {
+                    } else if (livingentity.getHealth() <= 0.0F) {
+                        // Only a real death counts: a target that left the render distance or logged out is just removed.
                         this.spawn(livingentity);
+                        iterator.remove();
+                    } else if (livingentity.isRemoved()) {
                         iterator.remove();
                     }
                 }

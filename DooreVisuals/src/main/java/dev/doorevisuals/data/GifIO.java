@@ -243,6 +243,11 @@ public final class GifIO {
         }
     }
 
+    /** The path of ffmpeg, or null when it is not installed. */
+    public static String ffmpeg() {
+        return findBin("ffmpeg");
+    }
+
     private static String findBin(String name) {
         ensureBins();
         return !"ffmpeg".equals(name) && !"ffmpeg.exe".equals(name) ? cachedFfprobe : cachedFfmpeg;

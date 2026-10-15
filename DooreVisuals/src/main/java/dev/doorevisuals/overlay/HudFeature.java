@@ -85,6 +85,10 @@ public final class HudFeature extends Feature {
     private final Opt.Flag island = this.opt(new Opt.Flag("island", "\u041e\u0441\u0442\u0440\u043e\u0432", true));
     private final Opt.Flag targetHud = this.opt(new Opt.Flag("target_hud", "\u0426\u0435\u043b\u044c", true));
     private final Opt.Flag notifications = this.opt(new Opt.Flag("notifications", "\u0423\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u044f", true));
+    private final Opt.Flag clockOn = this.opt(new Opt.Flag("clock", "Время", false));
+    private final Opt.Flag clockSeconds = this.opt(new Opt.Flag("clock_seconds", "Время · секунды", false).visibleWhen(this.clockOn::get));
+    private final Opt.Flag watermarkTime = this.opt(new Opt.Flag("wm_time", "Watermark · время", false).visibleWhen(this.watermark::get));
+    private final Opt.Flag vitals = this.opt(new Opt.Flag("vitals", "Предупреждения: здоровье, голод, броня", true));
     private final Opt.Pick hpMode = this.opt(
         new Opt.Pick(
                 "hp_mode",
@@ -232,7 +236,7 @@ public final class HudFeature extends Feature {
         Map<String, HudSlot> map = new LinkedHashMap<>();
 
         for (String s : new String[]{
-            "watermark", "coords", "keys", "armor", "inventory", "effects", "cooldowns", "hotkeys", "island", "target_hud", "notifications"
+            "watermark", "coords", "keys", "armor", "inventory", "effects", "cooldowns", "clock", "hotkeys", "island", "target_hud", "notifications"
         }) {
             HudSlot hudslot = defaultSlot(s, name);
             if (hudslot != null) {
@@ -256,6 +260,7 @@ public final class HudFeature extends Feature {
             case "inventory" -> new HudSlot("inventory", "\u0418\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u044c", -8.0F, 190.0F, 176.0F, 80.0F);
             case "effects" -> new HudSlot("effects", "\u042d\u0444\u0444\u0435\u043a\u0442\u044b", -8.0F, flag1 ? 8.0F : 148.0F, 128.0F, 40.0F);
             case "cooldowns" -> new HudSlot("cooldowns", "\u041a\u0443\u043b\u0434\u0430\u0443\u043d\u044b", 8.0F, 50.0F, 96.0F, 26.0F);
+            case "clock" -> new HudSlot("clock", "Время", 8.0F, 80.0F, 70.0F, 20.0F);
             case "hotkeys" -> new HudSlot("hotkeys", "HotKeys", -8.0F, 8.0F, 100.0F, 20.0F);
             case "island" -> new HudSlot("island", "\u041e\u0441\u0442\u0440\u043e\u0432", 0.0F, 8.0F, 188.0F, 28.0F);
             case "target_hud" -> new HudSlot("target_hud", "\u0426\u0435\u043b\u044c", 0.0F, 0.0F, 196.0F, 52.0F);
@@ -275,6 +280,7 @@ public final class HudFeature extends Feature {
         this.slots.put("inventory", new HudSlot("inventory", "\u0418\u043d\u0432\u0435\u043d\u0442\u0430\u0440\u044c", -8.0F, 190.0F, 176.0F, 80.0F));
         this.slots.put("effects", new HudSlot("effects", "\u042d\u0444\u0444\u0435\u043a\u0442\u044b", -8.0F, 148.0F, 128.0F, 40.0F));
         this.slots.put("cooldowns", new HudSlot("cooldowns", "\u041a\u0443\u043b\u0434\u0430\u0443\u043d\u044b", 8.0F, 50.0F, 96.0F, 26.0F));
+        this.slots.put("clock", new HudSlot("clock", "Время", 8.0F, 80.0F, 70.0F, 20.0F));
         this.slots.put("hotkeys", new HudSlot("hotkeys", "HotKeys", -8.0F, 8.0F, 100.0F, 20.0F));
         this.slots.put("island", new HudSlot("island", "\u041e\u0441\u0442\u0440\u043e\u0432", 0.0F, 8.0F, 168.0F, 24.0F));
         this.slots.put("target_hud", new HudSlot("target_hud", "\u0426\u0435\u043b\u044c", 0.0F, 0.0F, 196.0F, 52.0F));
@@ -309,6 +315,7 @@ public final class HudFeature extends Feature {
             case "\u0418\u043d\u0444\u043e" -> {
                 switch (id) {
                     case "watermark":
+                    case "clock":
                     case "coords":
                     case "effects":
                     case "notifications":
@@ -356,6 +363,7 @@ public final class HudFeature extends Feature {
             case "inventory" -> inventory.get();
             case "effects" -> effects.get();
             case "cooldowns" -> cooldowns.get();
+            case "clock" -> clockOn.get();
             case "island" -> island.get();
             case "target_hud" -> targetHud.get();
             case "notifications" -> notifications.get();
@@ -372,6 +380,7 @@ public final class HudFeature extends Feature {
             case "inventory" -> inventory.set(!inventory.get());
             case "effects" -> effects.set(!effects.get());
             case "cooldowns" -> cooldowns.set(!cooldowns.get());
+            case "clock" -> clockOn.set(!clockOn.get());
             case "island" -> island.set(!island.get());
             case "target_hud" -> targetHud.set(!targetHud.get());
             case "notifications" -> notifications.set(!notifications.get());
@@ -463,6 +472,10 @@ public final class HudFeature extends Feature {
 
         if (this.show(this.cooldowns, "cooldowns")) {
             list.add(this.slots.get("cooldowns"));
+        }
+
+        if (this.show(this.clockOn, "clock")) {
+            list.add(this.slots.get("clock"));
         }
 
         if (this.show(this.hotkeys, "hotkeys") && (this.editingLayout() || this.hotAppear.value() > 0.02F || !this.hotkeyEntries().isEmpty())) {
@@ -626,6 +639,7 @@ public final class HudFeature extends Feature {
             }
 
             this.trackTotem(minecraftclient);
+            this.trackVitals(minecraftclient);
             boolean flag = this.editingLayout();
             long i = System.nanoTime();
             this.frameDt = this.lastNanos == 0L ? 0.016666668F : Math.max(0.004166667F, Math.min(0.033333335F, (float)(i - this.lastNanos) / 1.0E9F));
@@ -649,6 +663,10 @@ public final class HudFeature extends Feature {
 
             if (this.show(this.cooldowns, "cooldowns")) {
                 this.paintCooldowns(g, minecraftclient, flag);
+            }
+
+            if (this.show(this.clockOn, "clock")) {
+                this.paintClock(g, minecraftclient);
             }
 
             if (this.show(this.hotkeys, "hotkeys")) {
@@ -938,6 +956,7 @@ public final class HudFeature extends Feature {
         if (watermarkFps.get()) parts.add((labels ? "Fps " : "") + mc.getCurrentFps());
         if (watermarkPing.get()) parts.add((labels ? "Ping " : "") + ping);
         if (watermarkTps.get()) parts.add((labels ? "Tps " : "") + String.format(Locale.ROOT, "%.1f", TpsMeter.tps()));
+        if (watermarkTime.get()) parts.add(java.time.LocalTime.now().format(CLOCK_HM));
 
         float size = 7.2F;
         float h = 20.0F;
@@ -966,6 +985,74 @@ public final class HudFeature extends Feature {
         Ui.pop();
         this.watermarkIconBlits.clear();
         this.watermarkIconReady = false;
+    }
+
+    private static final java.time.format.DateTimeFormatter CLOCK_HM = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+    private static final java.time.format.DateTimeFormatter CLOCK_HMS = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    /** A plain clock: the real time of the computer, with or without seconds. */
+    private void paintClock(DrawContext g, MinecraftClient mc) {
+        HudSlot slot = this.slots.get("clock");
+        String text = java.time.LocalTime.now().format(this.clockSeconds.get() ? CLOCK_HMS : CLOCK_HM);
+        float size = 7.2F;
+        float h = 20.0F;
+        float pad = 9.0F;
+        float w = pad * 2.0F + 12.0F + Paint.tw(text, size);
+        slot.size(w, h);
+        float[] pos = this.slotPos(slot, w, h, mc);
+        int accent = this.hudAccent();
+        Ui.push();
+        Ui.move(pos[0], pos[1]);
+        Ui.scale(Math.max(0.01F, slot.scale()), Math.max(0.01F, slot.scale()));
+        this.hudPlate(g, w, h, accent);
+        glyph(g, 4, pad + 3.6F, h * 0.5F, accent);
+        Paint.text(g, text, pad + 12.0F, (h - size) * 0.5F, Theme.TEXT, size);
+        Ui.pop();
+    }
+
+    private boolean warnHealth;
+    private boolean warnFood;
+    private final boolean[] warnArmor = new boolean[4];
+
+    /**
+     * Warnings in the notifications: low health, hunger (with an estimate of how long the saturation lasts) and armor that
+     * is about to break. Each fires once and is re-armed when the value recovers, so nothing repeats every frame.
+     */
+    private void trackVitals(MinecraftClient mc) {
+        ClientPlayerEntity p = mc.player;
+        if (!this.vitals.get() || p == null || p.isCreative() || p.isSpectator()) {
+            return;
+        }
+        float hp = p.getHealth();
+        if (hp <= 6.0F && !this.warnHealth) {
+            this.warnHealth = true;
+            this.notify("Мало здоровья", String.format(Locale.ROOT, "%.1f из %.0f", hp, p.getMaxHealth()), HudFeature.NoteKind.BAD);
+        } else if (hp > 10.0F) {
+            this.warnHealth = false;
+        }
+
+        int food = p.getHungerManager().getFoodLevel();
+        if (food <= 6 && !this.warnFood) {
+            this.warnFood = true;
+            float sat = p.getHungerManager().getSaturationLevel();
+            // One saturation point is four units of exhaustion; sprinting spends about 0.56 per second, anything else far less.
+            float rate = p.isSprinting() ? 0.56F : 0.12F;
+            int secs = Math.round((sat * 4.0F + 4.0F) / rate);
+            this.notify("Голод", "еда " + food + "/20, насыщение " + String.format(Locale.ROOT, "%.1f", sat) + ", ещё ~" + secs + " с", HudFeature.NoteKind.WARN);
+        } else if (food > 10) {
+            this.warnFood = false;
+        }
+
+        for (int i = 0; i < ARMOR.length; i++) {
+            ItemStack stack = p.getEquippedStack(ARMOR[i]);
+            boolean low = armorLow(stack);
+            if (low && !this.warnArmor[i]) {
+                this.warnArmor[i] = true;
+                this.notify("Броня ломается", stack.getName().getString(), HudFeature.NoteKind.WARN);
+            } else if (!low) {
+                this.warnArmor[i] = false;
+            }
+        }
     }
 
     private void paintCoords(DrawContext g, MinecraftClient mc) {
@@ -1130,12 +1217,12 @@ public final class HudFeature extends Feature {
         HudSlot hudslot = this.slots.get("armor");
         boolean flag = this.editingLayout();
         int i = this.armorPacked();
-        if (i == 0 && !flag) {
+        if (i == 0 && !flag && this.potionCount == 0) {
             hudslot.size(28.0F, 24.0F);
         } else {
             boolean flag1 = i > 0;
             int j = flag1 ? i : 4;
-            float f = 8.0F + j * 20.0F;
+            float f = 8.0F + j * 20.0F + (this.potionCount > 0 ? 34.0F : 0.0F);
             float f1 = 24.0F;
             hudslot.size(f, f1);
             MinecraftClient minecraftclient = MinecraftClient.getInstance();
@@ -1165,6 +1252,14 @@ public final class HudFeature extends Feature {
                         Paint.bar(g, f2 + 2.0F, 18.0F, 14.0F, 2.2F, f4, j1);
                     }
                 }
+            }
+
+            if (this.potionCount > 0) {
+                // A flask and the number of potions in the inventory.
+                float px = 6 + l * 20 + 4.0F;
+                Paint.circle(g, px + 4.0F, 14.0F, 4.2F, Theme.alpha(0xB06CFF, 210));
+                Paint.box(g, px + 2.6F, 5.0F, 2.8F, 5.0F, Theme.alpha(0xFFFFFF, 190), 0.8F);
+                Paint.text(g, "x" + this.potionCount, px + 11.0F, 8.5F, Theme.TEXT, 7.0F);
             }
 
             Ui.pop();
@@ -1536,12 +1631,23 @@ public final class HudFeature extends Feature {
         }
     }
 
+    private int potionCount;
+
     private void refreshArmor() {
         long i = System.currentTimeMillis();
         if (i >= this.armorNext) {
             this.armorNext = i + 150L;
             ClientPlayerEntity clientplayerentity = MinecraftClient.getInstance().player;
             if (clientplayerentity != null) {
+                int potions = 0;
+                PlayerInventory inventory = clientplayerentity.getInventory();
+                for (int k = 0; k < 41; k++) {
+                    ItemStack st = inventory.getStack(k);
+                    if (st.isOf(Items.POTION) || st.isOf(Items.SPLASH_POTION) || st.isOf(Items.LINGERING_POTION)) {
+                        potions += st.getCount();
+                    }
+                }
+                this.potionCount = potions;
                 for (int j = 0; j < ARMOR.length; j++) {
                     this.armorStacks[j] = clientplayerentity.getEquippedStack(ARMOR[j]).copy();
                 }

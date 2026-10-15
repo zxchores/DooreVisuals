@@ -90,6 +90,10 @@ public final class CosmeticsFeature extends Feature implements Tick {
             "\u0417\u0432\u0451\u0437\u0434\u043d\u044b\u0439 \u043e\u0440\u0431"
         )
     );
+    private final Opt.Action catalog = this.opt(new Opt.Action("cape_catalog", "Каталог плащей", () -> {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.setScreen(new dev.doorevisuals.ui.CapeCatalogScreen(mc.currentScreen));
+    }));
     private final Opt.Flag badge = this.opt(new Opt.Flag("badge", "\u0417\u043d\u0430\u0447\u043e\u043a Doore \u0443 \u043d\u0438\u043a\u0430", true));
     private final Opt.Flag trails = this.opt(
         new Opt.Flag("trails", "\u0421\u043b\u0435\u0434 \u043f\u043b\u0430\u0449\u0430 / \u043a\u0440\u044b\u043b\u044c\u0435\u0432", true)
@@ -205,6 +209,22 @@ public final class CosmeticsFeature extends Feature implements Tick {
         } else {
             return null;
         }
+    }
+
+    /** The texture of a cape by its label in the menus (built-in names and files from the capes folder), or null for none. */
+    public static Identifier previewTexture(String label) {
+        Identifier file = CapeFiles.texture(label);
+        if (file != null) {
+            return file;
+        }
+        return switch (label) {
+            case "Doore", "\u041d\u0435\u043e\u043d" -> CAPE_DOORE;
+            case "\u0422\u0451\u043c\u043d\u044b\u0439" -> CAPE_DARK;
+            case "\u0411\u0440\u0430\u0442\u044c\u044f" -> CAPE_BROS;
+            case "\u0421\u0432\u0430\u0434\u044c\u0431\u0430" -> CAPE_WEDDING;
+            case "\u0411\u0435\u043b\u043a\u0430" -> CAPE_SQUIRREL;
+            default -> null;
+        };
     }
 
     public static Identifier textureOf(String id) {

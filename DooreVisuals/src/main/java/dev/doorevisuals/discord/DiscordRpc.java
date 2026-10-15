@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public final class DiscordRpc implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger("DooreVisuals/Discord");
     private static final String RPC_OWNER = "owner - xores";
-    private static final String RPC_VERSION = "версия - 1.2.0 beta";
+    private static final String RPC_VERSION = "версия - 1.2.1 beta";
     private final Supplier<DiscordRpc.Settings> settings;
     private final ScheduledExecutorService io = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r, "DooreDiscord");

@@ -18,6 +18,9 @@ public final class GuiWindowsFeature extends Feature {
     private final Opt.Pick panelStyle = this.opt(new Opt.Pick("panel_style", "Фон панелей", "Блюр", "Блюр", "Чёрный", "Белый"));
     private final Opt.Flag ripple = this.opt(new Opt.Flag("ripple", "Волна при клике", true));
     private final Opt.Flag guiSound = this.opt(new Opt.Flag("gui_sound", "\u0417\u0432\u0443\u043a GUI", true));
+    private final Opt.Pick soundPack = this.opt(
+            new Opt.Pick("sound_pack", "Пак звуков", "Стандарт", "Стандарт", "Мягкие", "Кристалл", "Клавиши", "Тихие").visibleWhen(this.guiSound::get)
+    );
     private final Opt.Pick motion = this.opt(
             new Opt.Pick(
                     "motion",
@@ -66,6 +69,10 @@ public final class GuiWindowsFeature extends Feature {
 
     public static boolean rippleOn() {
         return App.features().find(GuiWindowsFeature.class).map(f -> f.on() && (Boolean)f.ripple.get()).orElse(true);
+    }
+
+    public static String soundPack() {
+        return App.features().find(GuiWindowsFeature.class).map(f -> f.soundPack.get()).orElse("Стандарт");
     }
 
     public static boolean soundOn() {

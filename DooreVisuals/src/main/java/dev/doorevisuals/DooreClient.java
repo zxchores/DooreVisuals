@@ -34,15 +34,28 @@ import org.slf4j.LoggerFactory;
 public final class DooreClient implements ClientModInitializer {
     private static boolean menuKeyWasDown;
     public static final String ID = "doorevisuals";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
     private static final Logger LOG = LoggerFactory.getLogger("DooreVisuals");
 
+    private static boolean pipelinesWarmed;
+
+    @Override
     public void onInitializeClient() {
         App.boot();
         CosmeticsNet.initClient();
         IrisAutoInstaller.ensureStarted();
         ClientTickEvents.END_CLIENT_TICK.register((EndTick)mc -> {
             if (App.live()) {
+                // The shader sources exist only after the first resource load, so the pipelines are compiled once the
+                // first world is up; compiling them earlier fails, and a failed pipeline stays failed.
+                if (!pipelinesWarmed && mc.world != null) {
+                    pipelinesWarmed = true;
+                    try {
+                        dev.doorevisuals.draw.Gpu.precompileAll();
+                    } catch (Throwable error) {
+                        LOG.warn("Pipeline precompile skipped: {}", error.toString());
+                    }
+                }
                 ConfigApplyScreen.tick(mc);
                 App.aim().pulse(mc);
                 SessionStats.tick(mc);

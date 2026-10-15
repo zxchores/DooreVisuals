@@ -5,6 +5,8 @@ import net.minecraft.util.Identifier;
 public final class Sprites {
     public static final Identifier DOT = id("dot.png");
     public static final Identifier HEART = id("heart.png");
+    /** White, smooth heart for tinting with a theme colour. */
+    public static final Identifier HEART_SOFT = id("heart_soft.png");
     public static final Identifier STAR = id("star.png");
     public static final Identifier DOLLAR = id("dollar.png");
     public static final Identifier DIGIT_6 = id("digit_6.png");

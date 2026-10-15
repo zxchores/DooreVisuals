@@ -49,7 +49,12 @@ public abstract class ContainerToolsMixin {
                                 float f1 = this.y + 8.0F;
                                 doore$btn(g, mx, my, fx, f1, 64.0F, 16.0F, "выброс");
                                 doore$btn(g, mx, my, fx, f1 + 20.0F, 64.0F, 16.0F, "сорт");
+                                doore$btn(g, mx, my, fx, f1 + 40.0F, 64.0F, 16.0F, "сорт инв.");
                             });
+                        } else if (handledscreen instanceof InventoryScreen) {
+                            // The player's own inventory: one button, next to the inventory panel.
+                            App.features().find(InvToolsFeature.class).filter(Feature::on).ifPresent(f ->
+                                doore$btn(g, mx, my, this.x + this.backgroundWidth + 6.0F, this.y + 8.0F, 64.0F, 16.0F, "сорт"));
                         }
                     }
                 );
@@ -75,10 +80,21 @@ public abstract class ContainerToolsMixin {
                     }
 
                     if (Paint.hit(d0, d1, f, f1 + 20.0F, 64.0F, 16.0F)) {
-                        InvToolsFeature.sort(minecraftclient);
+                        InvToolsFeature.sort(minecraftclient, false);
                         cir.setReturnValue(true);
                         return;
                     }
+
+                    if (Paint.hit(d0, d1, f, f1 + 40.0F, 64.0F, 16.0F)) {
+                        InvToolsFeature.sort(minecraftclient, true);
+                        cir.setReturnValue(true);
+                        return;
+                    }
+                } else if (handledscreen instanceof InventoryScreen && App.features().find(InvToolsFeature.class).filter(Feature::on).isPresent()
+                        && Paint.hit(d0, d1, this.x + this.backgroundWidth + 6.0F, this.y + 8.0F, 64.0F, 16.0F)) {
+                    InvToolsFeature.sort(minecraftclient, true);
+                    cir.setReturnValue(true);
+                    return;
                 }
             }
         }

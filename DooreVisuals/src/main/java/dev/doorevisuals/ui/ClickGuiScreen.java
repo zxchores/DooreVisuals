@@ -11,6 +11,7 @@ import dev.doorevisuals.data.BannerLibrary;
 import dev.doorevisuals.data.Folders;
 import dev.doorevisuals.data.GifIO;
 import dev.doorevisuals.data.GuiLayout;
+import dev.doorevisuals.data.ThemeCodec;
 import dev.doorevisuals.data.ThemesStore;
 import dev.doorevisuals.draw.Anim;
 import dev.doorevisuals.draw.Keys;
@@ -80,7 +81,9 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
 
     /** Which panels are slid out next to the sidebar: none, the five module columns, or the appearance flyout. */
     private int mode = MODE_NONE;
-    private final Anim modAnim = new Anim(0.0F);
+    /** Every plate slides out on its own: a click on its name in the sidebar opens or folds just that one. */
+    private final Anim[] colAnim = {new Anim(0.0F), new Anim(0.0F), new Anim(0.0F), new Anim(0.0F)};
+    private final boolean[] colOpen = new boolean[COLS.length];
     private final Anim banAnim = new Anim(0.0F);
     private final float[] colXs = new float[COLS.length];
     private float colWNow;
@@ -90,6 +93,12 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
     private float flyScroll;
     private float flyTarget;
     private float flyContent;
+    /** The own-theme editor: hue, saturation and brightness of the two colours; a slider being dragged in the flyout. */
+    private final float[] hsvA = new float[3];
+    private final float[] hsvB = new float[3];
+    private FlyDrag flyDrag;
+    /** Item and texture previews are drawn by the game's own renderer after the NanoVG frame, so they land on top of it. */
+    private final List<Runnable> afterFrame = new ArrayList<>();
     private float flyView;
     private float flyTop;
     private float flyBottom;
@@ -210,6 +219,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         this.my = mouseY;
         this.hits.clear();
         this.midHits.clear();
+        this.afterFrame.clear();
         this.hoverFeature = null;
         long now = System.nanoTime();
         this.dt = Math.max(0.004166667F, Math.min(0.033333335F, (float)(now - this.lastNanos) / 1.0E9F));
@@ -219,7 +229,9 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         // The fully open layout is 640 x 360 units; it never grows past 1:1, so it stays in the middle of the screen.
         this.s = Math.max(0.5F, Math.min(1.0F, Math.min((this.width - 24.0F) / 640.0F, (this.height - 30.0F) / 360.0F)));
         this.applyPalette();
-        this.modAnim.springPanel(this.mode == MODE_MODULES ? 1.0F : 0.0F, this.dt);
+        for (int i = 0; i < COLS.length; i++) {
+            this.colAnim[i].springPanel(this.colOpen[i] ? 1.0F : 0.0F, this.dt);
+        }
         this.banAnim.springPanel(this.mode == MODE_BANNER ? 1.0F : 0.0F, this.dt);
 
         boolean opening = !this.closing && System.currentTimeMillis() - this.openedAt > 20L;
@@ -246,14 +258,40 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
             this.drawSidebar(g, r);
             this.drawFlyout(g, r);
             this.drawColumns(g, r);
-            if (this.modAnim.value() > 0.3F) {
+            if (this.columnsOut() > 0.3F) {
                 this.drawSearch(g, r);
             }
             this.drawTooltip(g);
             this.drawDropdown(g);
             Ui.alpha(1.0F);
         });
+        for (Runnable r : this.afterFrame) {
+            r.run();
+        }
         super.render(g, mouseX, mouseY, delta);
+    }
+
+    /** How far the most open plate is slid out, 0..1. */
+    private float columnsOut() {
+        float best = 0.0F;
+        for (Anim a : this.colAnim) {
+            best = Math.max(best, clamp01(a.value()));
+        }
+        return best;
+    }
+
+    private void closeColumns() {
+        java.util.Arrays.fill(this.colOpen, false);
+    }
+
+    private void openBanner() {
+        this.closeColumns();
+        this.mode = MODE_BANNER;
+    }
+
+    private void closeAll() {
+        this.closeColumns();
+        this.mode = MODE_NONE;
     }
 
     /** {sideX, sideY, sideW, sideH, colX0, colY, colW, colGap, colH, searchY}. The group is centred as a whole. */
@@ -263,10 +301,14 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         float gap = GAP * s;
         float colW = COL_W * s;
         float colGap = COL_GAP * s;
-        float modW = COLS.length * colW + (COLS.length - 1) * colGap;
-        float modV = clamp01(this.modAnim.value());
+        float sum = 0.0F;
+        for (Anim a : this.colAnim) {
+            sum += clamp01(a.value());
+        }
+        float modV = this.columnsOut();
+        float modW = sum * (colW + colGap) - colGap * modV;
         float banV = clamp01(this.banAnim.value());
-        float total = sideW + (gap + modW) * modV + (gap + FLY_W * s) * banV;
+        float total = sideW + gap * modV + modW + (gap + FLY_W * s) * banV;
         float x0 = (this.width - total) / 2.0F;
         float blockH = Math.min(this.height - 56.0F * s, BLOCK_H * s);
         float y0 = Math.max(8.0F, (this.height - blockH - 26.0F * s) / 2.0F);
@@ -300,6 +342,10 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
     }
 
     private void panelBody(DrawContext g, float x, float y, float w, float h) {
+        if (Theme.LIQUID) {
+            Paint.liquid(g, x, y, w, h, rgba(accent(), 1.0F), 12.0F * this.s);
+            return;
+        }
         Paint.box(g, x, y, w, h, rgba(this.panelRgb, this.panelA), 12.0F * this.s);
         Paint.outline(g, x, y, w, h, rgba(this.cOn, 0.06F), 12.0F * this.s);
     }
@@ -346,7 +392,11 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
             Paint.text(g, "DOORE VISUALS", bx + 8.0F * s, by + bh - 14.0F * s, rgba(0xFFFFFF, 1.0F), 6.2F * s);
         }
         this.hits.add(new Hit(bx, by, iw, bh, () -> {
-            this.mode = this.mode == MODE_BANNER ? MODE_NONE : MODE_BANNER;
+            if (this.mode == MODE_BANNER) {
+                this.closeAll();
+            } else {
+                this.openBanner();
+            }
             GuiSfx.click();
         }, null));
 
@@ -355,7 +405,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         float rh = 20.0F * s;
         for (int i = 0; i < COLS.length; i++) {
             float iy = ny + i * (rh + 2.0F * s);
-            boolean sel = this.mode == MODE_MODULES && i == this.focusCol;
+            boolean sel = this.colOpen[i];
             boolean hot = Paint.hit(this.mx, this.my, x + pad, iy, iw, rh);
             float hv = this.hover.computeIfAbsent("nav" + i, k -> new Anim(0.0F)).springHover(hot ? 1.0F : 0.0F, this.dt);
             float sv = this.toggle.computeIfAbsent("nav" + i, k -> new Anim(sel ? 1.0F : 0.0F)).springToggle(sel ? 1.0F : 0.0F, this.dt);
@@ -370,9 +420,15 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
             Paint.text(g, TITLES[i], x + pad + 26.0F * s, iy + (rh - 6.0F * s * 1.56F) / 2.0F, c, 6.0F * s);
             final int idx = i;
             this.hits.add(new Hit(x + pad, iy, iw, rh, () -> {
-                if (this.mode == MODE_MODULES && this.focusCol == idx) {
-                    this.mode = MODE_NONE;
+                if (this.colOpen[idx]) {
+                    this.colOpen[idx] = false;
+                    boolean any = false;
+                    for (boolean b : this.colOpen) {
+                        any |= b;
+                    }
+                    this.mode = any ? MODE_MODULES : MODE_NONE;
                 } else {
+                    this.colOpen[idx] = true;
                     this.mode = MODE_MODULES;
                     this.focusCol = idx;
                     this.scrollTarget.put(COLS[idx][0], 0.0F);
@@ -404,7 +460,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
             final int idx = i;
             this.hits.add(new Hit(cx - step / 2.0F, sy - 9.0F * s, step, 18.0F * s, () -> {
                 if (more) {
-                    this.mode = MODE_BANNER;
+                    this.openBanner();
                     GuiSfx.click();
                 } else {
                     this.applyPreset(presets[idx]);
@@ -579,10 +635,106 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         this.flyButton(g, "По умолч.", lx + half + 5.0F * s, cy, half, 16.0F * s, () -> this.applyPreset(presets[0]));
         cy += 22.0F * s;
 
+        // --- own theme: two colours with live preview, export and import as a text code
+        Paint.text(g, "Своя тема", lx, cy, muted, 4.8F * s);
+        cy += 11.0F * s;
+        if (this.flyDrag == null) {
+            java.awt.Color.RGBtoHSB((Theme.ACCENT >> 16) & 0xFF, (Theme.ACCENT >> 8) & 0xFF, Theme.ACCENT & 0xFF, this.hsvA);
+            java.awt.Color.RGBtoHSB((Theme.ACCENT_HOT >> 16) & 0xFF, (Theme.ACCENT_HOT >> 8) & 0xFF, Theme.ACCENT_HOT & 0xFF, this.hsvB);
+        }
+        // Preview: the two colours as a gradient and a sample watermark plate in the HUD colour.
+        float prevH = 18.0F * s;
+        Paint.grad(g, lx, cy, iw, prevH, rgba(Theme.ACCENT, 1.0F), rgba(Theme.ACCENT_HOT, 1.0F), 6.0F * s, false);
+        cy += prevH + 4.0F * s;
+        Paint.hudPlate(g, lx, cy, iw, 18.0F * s, Theme.HUD);
+        Paint.text(g, "DooreVisuals", lx + 8.0F * s, cy + 5.0F * s, Theme.HUD, 6.0F * s);
+        Paint.text(g, "Fps 240   Ping 12", lx + 8.0F * s + Paint.tw("DooreVisuals", 6.0F * s) + 8.0F * s, cy + 5.0F * s, Theme.TEXT, 6.0F * s);
+        cy += 18.0F * s + 6.0F * s;
+        cy = this.hsvSliders(g, "Основной", this.hsvA, lx, cy, iw, true);
+        cy = this.hsvSliders(g, "Второй", this.hsvB, lx, cy, iw, false);
+        this.flyButton(g, "Копировать код", lx, cy, half, 16.0F * s, this::copyThemeCode);
+        this.flyButton(g, "Вставить код", lx + half + 5.0F * s, cy, half, 16.0F * s, this::pasteThemeCode);
+        cy += 22.0F * s;
+
         this.flyContent = cy - (this.flyTop + this.flyScroll);
         Ui.unscissor();
         Paint.scrollbar(g, x + w - 5.0F * s, this.flyTop, this.flyView, this.flyContent, this.flyView, this.flyScroll);
         Ui.alpha(this.frameAlpha);
+    }
+
+    private record FlyDrag(float x, float w, java.util.function.Consumer<Float> set) {
+    }
+
+    private void applyFlyDrag(double mx) {
+        FlyDrag d = this.flyDrag;
+        if (d != null && d.w() > 1.0F) {
+            d.set().accept(clamp01((float)((mx - d.x()) / d.w())));
+        }
+    }
+
+    /** Three sliders (hue, saturation, brightness) for one colour of the own theme; returns the next y. */
+    private float hsvSliders(DrawContext g, String title, float[] hsv, float x, float y, float w, boolean primary) {
+        float s = this.s;
+        Paint.text(g, title, x, y, rgba(this.cOff, 1.0F), 4.6F * s);
+        y += 8.0F * s;
+        String[] names = {"оттенок", "насыщ.", "яркость"};
+        for (int k = 0; k < 3; k++) {
+            final int channel = k;
+            float h = 5.0F * s;
+            float tx = x;
+            float tw = w;
+            if (k == 0) {
+                for (int i = 0; i < 6; i++) {
+                    int c0 = java.awt.Color.HSBtoRGB(i / 6.0F, 1.0F, 1.0F) | 0xFF000000;
+                    int c1 = java.awt.Color.HSBtoRGB((i + 1) / 6.0F, 1.0F, 1.0F) | 0xFF000000;
+                    Paint.grad(g, tx + tw * i / 6.0F, y, tw / 6.0F + 0.6F, h, c0, c1, 0.0F, false);
+                }
+            } else {
+                float sat = k == 1 ? 0.0F : hsv[1];
+                int c0 = java.awt.Color.HSBtoRGB(hsv[0], k == 1 ? 0.0F : hsv[1], k == 1 ? hsv[2] : 0.0F) | 0xFF000000;
+                int c1 = java.awt.Color.HSBtoRGB(hsv[0], k == 1 ? 1.0F : hsv[1], hsv[2] > 0.0F ? (k == 1 ? hsv[2] : 1.0F) : 1.0F) | 0xFF000000;
+                Paint.grad(g, tx, y, tw, h, c0, c1, 2.0F * s, false);
+            }
+            float knob = tx + tw * clamp01(hsv[k]);
+            Paint.circle(g, knob, y + h / 2.0F, 4.2F * s, rgba(0xFFFFFF, 1.0F));
+            Paint.circle(g, knob, y + h / 2.0F, 2.6F * s, rgba(java.awt.Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]), 1.0F));
+            this.flyHit(tx - 3.0F * s, y - 4.0F * s, tw + 6.0F * s, h + 8.0F * s, () -> {
+                this.flyDrag = new FlyDrag(tx, tw, value -> {
+                    hsv[channel] = value;
+                    this.applyOwnTheme();
+                });
+                this.applyFlyDrag(this.clickX);
+            });
+            y += h + 5.0F * s;
+        }
+        return y + 2.0F * s;
+    }
+
+    /** Applies the two colours of the editor to the whole client at once. */
+    private void applyOwnTheme() {
+        int a = java.awt.Color.HSBtoRGB(this.hsvA[0], this.hsvA[1], this.hsvA[2]) | 0xFF000000;
+        int b = java.awt.Color.HSBtoRGB(this.hsvB[0], this.hsvB[1], this.hsvB[2]) | 0xFF000000;
+        App.features().find(ThemeFeature.class).ifPresent(tf -> tf.applyMixed(new ThemesStore.MixedPreset("своя", a, b)));
+    }
+
+    private void copyThemeCode() {
+        String code = ThemeCodec.encode(Theme.ACCENT, Theme.ACCENT_HOT, Theme.HUD, Theme.EFFECT);
+        if (this.client != null) {
+            this.client.keyboard.setClipboard(code);
+        }
+        this.flyNote = "Код темы скопирован";
+    }
+
+    private void pasteThemeCode() {
+        String clip = this.client == null ? "" : this.client.keyboard.getClipboard();
+        int[] c = ThemeCodec.decode(clip);
+        if (c == null) {
+            this.flyNote = "В буфере нет кода темы (DVT1:...)";
+            return;
+        }
+        App.features().find(ThemeFeature.class).ifPresent(tf -> tf.applyMixed(new ThemesStore.MixedPreset("импорт", c[0], c[1])));
+        Theme.applyMixed(c[0], c[1], c[2], c[3]);
+        this.flyNote = "Тема применена";
     }
 
     private void flyButton(DrawContext g, String label, float x, float y, float w, float h, Runnable action) {
@@ -655,7 +807,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         if (paths == null || !App.live()) {
             return;
         }
-        this.mode = MODE_BANNER;
+        this.openBanner();
         for (Path path : paths) {
             this.importBanner(path);
         }
@@ -779,17 +931,23 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         for (int i = 0; i < COLS.length; i++) {
             this.colXs[i] = -10000.0F;
         }
-        float mv = this.modAnim.value();
-        if (mv < 0.02F) {
+        if (this.columnsOut() < 0.02F) {
             return;
         }
-        // Slide out from under the sidebar, one column after another; the first one ends up on top.
+        // Each plate takes its place after the ones to its left that are out, and slides in from the sidebar side.
+        float[] baseX = new float[COLS.length];
+        float acc = r[4];
+        for (int i = 0; i < COLS.length; i++) {
+            float t = clamp01(this.colAnim[i].value());
+            baseX[i] = acc;
+            acc += t * (colW + colGap);
+        }
         for (int i = COLS.length - 1; i >= 0; i--) {
-            // Staggered start; the last column reaches exactly 1 when the animation does, so it never stays tucked under its neighbour.
-            float lag = 0.12F;
-            float t = clamp01((mv - i * lag) / (1.0F - (COLS.length - 1) * lag));
-            float finalX = r[4] + i * (colW + colGap);
-            float x = r[4] + (finalX - r[4]) * t;
+            float t = clamp01(this.colAnim[i].value());
+            if (t < 0.02F) {
+                continue;
+            }
+            float x = baseX[i] - (1.0F - t) * 30.0F * this.s;
             this.colXs[i] = x;
             this.colFade = t;
             Ui.alpha(this.frameAlpha * t);
@@ -975,7 +1133,14 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         return sum;
     }
 
+    private static final int CHIP_COLUMNS = 4;
+    private final java.util.Map<Opt.Pick, String[]> chipKeys = new java.util.IdentityHashMap<>();
+
     private float optHeight(Opt<?> opt) {
+        if (opt instanceof Opt.Pick pick && pick.isChips()) {
+            int rows = (pick.options().size() + CHIP_COLUMNS - 1) / CHIP_COLUMNS;
+            return (16 + rows * 16 + 2) * this.s;
+        }
         return (opt instanceof Opt.Num ? 28 : 20) * this.s;
     }
 
@@ -1038,6 +1203,38 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
                 this.drag = new DragNum(num, f, sx, sw);
                 this.applyDrag(this.clickX);
             }, null);
+        } else if (opt instanceof Opt.Pick pick && pick.isChips()) {
+            // Compact buttons in several rows; the chosen one is filled with the accent colour.
+            Paint.text(g, this.fitText(opt.label(), ts, w * 0.58F), x + 4.0F * s, lineY, muted, ts);
+            List<String> names = pick.options();
+            String[] keys = this.chipKeys.get(pick);
+            if (keys == null || keys.length != names.size()) {
+                keys = new String[names.size()];
+                for (int k = 0; k < keys.length; k++) {
+                    keys[k] = f.id() + ":" + opt.id() + ":" + k;
+                }
+                this.chipKeys.put(pick, keys);
+            }
+            float gap = 3.0F * s;
+            float cw = (w - 8.0F * s - gap * (CHIP_COLUMNS - 1)) / CHIP_COLUMNS;
+            float ch = 13.0F * s;
+            float top = y + 16.0F * s;
+            float size = 5.2F * s;
+            for (int n = 0; n < names.size(); n++) {
+                String name = names.get(n);
+                float cx = x + 4.0F * s + (n % CHIP_COLUMNS) * (cw + gap);
+                float cy = top + (n / CHIP_COLUMNS) * (ch + gap);
+                boolean chosen = name.equals(pick.get());
+                boolean hot = this.my >= vy0 && this.my <= vy1 && Paint.hit(this.mx, this.my, cx, cy, cw, ch);
+                float hv = this.hover.computeIfAbsent(keys[n], k -> new Anim(0.0F)).springHover(hot ? 1.0F : 0.0F, this.dt);
+                Paint.box(g, cx, cy, cw, ch, chosen ? rgba(accent(), 0.92F) : rgba(this.cOn, 0.07F + 0.07F * hv), 4.0F * s);
+                Paint.textC(g, name, cx + cw / 2.0F, cy + (ch - size * 1.56F) / 2.0F, rgba(chosen ? 0xFFFFFF : mix(this.cOff, this.cOn, hv), 1.0F), size);
+                this.addHit(cx, cy, cw, ch, vy0, vy1, () -> {
+                    pick.set(name);
+                    f.poke();
+                    GuiSfx.click();
+                }, null);
+            }
         } else if (opt instanceof Opt.Pick pick) {
             String cur = pick.get();
             Paint.text(g, this.fitText(opt.label(), ts, w * 0.58F), x + 4.0F * s, lineY, muted, ts);
@@ -1122,6 +1319,71 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         Paint.outline(g, bx, by, bw, bh, rgba(accent(), 0.5F), 6.0F * s);
         Paint.text(g, f.name(), bx + 10.0F * s, by + 6.0F * s, rgba(this.cOn, 1.0F), 7.0F * s);
         Paint.text(g, f.about(), bx + 10.0F * s, by + 19.0F * s, rgba(this.cOff, 1.0F), size);
+        this.drawPreview(g, f, bx, by + bh + 6.0F * s, bw);
+    }
+
+    /**
+     * A live preview under the tooltip, for three modules only: HUD (a small mock-up of its plates in the theme colours),
+     * Cosmetics (the cape that is on) and Custom Swords (the knives, one after another).
+     */
+    private void drawPreview(DrawContext g, Feature f, float x, float y, float w) {
+        String id = f.id();
+        boolean hud = "hud".equals(id);
+        boolean cosmetics = "cosmetics".equals(id);
+        boolean knives = "knives".equals(id);
+        if (!hud && !cosmetics && !knives) {
+            return;
+        }
+        float s = this.s;
+        float pw = Math.max(w, 150.0F * s);
+        float ph = 78.0F * s;
+        if (y + ph > this.height - 6.0F * s) {
+            y = this.height - ph - 6.0F * s;
+        }
+        x = Math.min(x, this.width - pw - 8.0F * s);
+        Paint.box(g, x, y, pw, ph, rgba(this.panelRgb, 0.94F), 6.0F * s);
+        Paint.outline(g, x, y, pw, ph, rgba(accent(), 0.5F), 6.0F * s);
+        if (hud) {
+            // a watermark plate, a coordinates plate and a row of armor slots
+            Paint.hudPlate(g, x + 8.0F * s, y + 8.0F * s, pw - 16.0F * s, 16.0F * s, Theme.HUD);
+            Paint.text(g, "DooreVisuals", x + 14.0F * s, y + 12.0F * s, Theme.HUD, 6.0F * s);
+            Paint.text(g, "Fps 240  Ping 12", x + 14.0F * s + Paint.tw("DooreVisuals", 6.0F * s) + 8.0F * s, y + 12.0F * s, Theme.TEXT, 6.0F * s);
+            Paint.hudPlate(g, x + 8.0F * s, y + ph - 26.0F * s, 80.0F * s, 18.0F * s, Theme.HUD);
+            Paint.text(g, "12x 64y -40z", x + 13.0F * s, y + ph - 21.0F * s, Theme.TEXT, 5.6F * s);
+            for (int i = 0; i < 4; i++) {
+                Paint.box(g, x + pw - 8.0F * s - (4 - i) * 16.0F * s, y + ph - 26.0F * s, 14.0F * s, 14.0F * s, rgba(0x000000, 0.35F), 3.0F * s);
+                Paint.box(g, x + pw - 6.0F * s - (4 - i) * 16.0F * s, y + ph - 13.0F * s, 10.0F * s, 2.0F * s, rgba(Theme.OK, 1.0F), 1.0F * s);
+            }
+        } else if (cosmetics) {
+            String label = App.features().find(dev.doorevisuals.cosmetics.CosmeticsFeature.class).map(dev.doorevisuals.cosmetics.CosmeticsFeature::capeLabel).orElse("Нет");
+            Paint.text(g, "Плащ: " + label, x + 10.0F * s, y + 8.0F * s, rgba(this.cOn, 1.0F), 6.0F * s);
+            net.minecraft.util.Identifier tex = dev.doorevisuals.cosmetics.CosmeticsFeature.previewTexture(label);
+            if (tex != null) {
+                final float tx = x + pw - 10.0F * s - 40.0F * s;
+                final float ty = y + 8.0F * s;
+                final float sc = s;
+                this.afterFrame.add(() -> g.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, tex, (int)tx, (int)ty, 1.0F, 1.0F, (int)(40.0F * sc), (int)(64.0F * sc), 10, 16, 64, 32, -1));
+            } else {
+                Paint.text(g, "без плаща", x + 10.0F * s, y + 24.0F * s, rgba(this.cOff, 1.0F), 5.4F * s);
+            }
+            Paint.text(g, "Каталог плащей: в настройках модуля", x + 10.0F * s, y + ph - 14.0F * s, rgba(this.cOff, 1.0F), 4.8F * s);
+        } else {
+            int count = dev.doorevisuals.tools.SwordFeature.previewCount();
+            int index = (int)((System.currentTimeMillis() / 1400L) % count);
+            Paint.text(g, dev.doorevisuals.tools.SwordFeature.previewName(index), x + 10.0F * s, y + 8.0F * s, rgba(this.cOn, 1.0F), 6.4F * s);
+            Paint.text(g, (index + 1) + " / " + count, x + 10.0F * s, y + 20.0F * s, rgba(this.cOff, 1.0F), 5.0F * s);
+            final float ix = x + pw - 10.0F * s - 58.0F * s;
+            final float iy = y + 7.0F * s;
+            final float sc = Math.max(1.0F, s * 3.4F);
+            net.minecraft.item.ItemStack stack = dev.doorevisuals.tools.SwordFeature.previewStack(index);
+            this.afterFrame.add(() -> {
+                g.getMatrices().pushMatrix();
+                g.getMatrices().translate(ix, iy);
+                g.getMatrices().scale(sc, sc);
+                g.drawItem(stack, 0, 0);
+                g.getMatrices().popMatrix();
+            });
+        }
     }
 
     /** Middle click on a row: the next key pressed becomes the module's bind. */
@@ -1269,6 +1531,10 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
 
     @Override
     public boolean mouseDragged(Click event, double dx, double dy) {
+        if (this.flyDrag != null) {
+            this.applyFlyDrag(event.x());
+            return true;
+        }
         if (this.drag != null) {
             this.applyDrag(event.x());
             return true;
@@ -1279,6 +1545,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
     @Override
     public boolean mouseReleased(Click event) {
         this.drag = null;
+        this.flyDrag = null;
         return super.mouseReleased(event);
     }
 
@@ -1342,7 +1609,7 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
             if (!this.search.isEmpty()) {
                 this.search = "";
             } else if (this.mode != MODE_NONE) {
-                this.mode = MODE_NONE;
+                this.closeAll();
             } else {
                 this.requestClose();
             }
@@ -1361,6 +1628,8 @@ public final class ClickGuiScreen extends Screen implements MenuGui {
         char c = (char)event.codepoint();
         if (this.capture == null && c >= ' ' && this.search.length() < 24) {
             this.search = this.search + c;
+            // A search looks through every module, so all the plates slide out.
+            java.util.Arrays.fill(this.colOpen, true);
             this.mode = MODE_MODULES;
             this.jumpToMatches();
             return true;

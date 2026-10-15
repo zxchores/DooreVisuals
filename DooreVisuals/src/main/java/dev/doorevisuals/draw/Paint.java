@@ -121,7 +121,27 @@ public final class Paint {
         slim(g, x, y, w, h);
     }
 
+    /**
+     * Liquid glass: a dark, clear body so text stays readable, a tint of the theme colour, a bright sheen on the upper half,
+     * a thin white rim and a lit lower edge, like a drop of glass on the screen.
+     */
+    public static void liquid(DrawContext g, float x, float y, float w, float h, int accent, float r) {
+        float clear = Theme.LIQUID_A;
+        int body = Math.round(150.0F * (1.15F - clear));
+        box(g, x, y, w, h, Theme.alpha(0x0B0A12, body), r);
+        box(g, x, y, w, h, Theme.alpha(accent & 0xFFFFFF, 18), r);
+        grad(g, x + 1.0F, y + 1.0F, w - 2.0F, Math.max(2.0F, h * 0.46F), Theme.alpha(0xFFFFFF, 46), Theme.alpha(0xFFFFFF, 4), Math.max(1.0F, r - 1.0F), true);
+        outline(g, x, y, w, h, Theme.alpha(0xFFFFFF, 92), r);
+        outline(g, x + 1.0F, y + 1.0F, w - 2.0F, h - 2.0F, Theme.alpha(0xFFFFFF, 20), Math.max(1.0F, r - 1.0F));
+        box(g, x + r * 0.7F, y + 1.0F, Math.max(2.0F, w - r * 1.4F), 1.2F, Theme.alpha(0xFFFFFF, 150), 0.6F);
+        box(g, x + r, y + h - 1.8F, Math.max(2.0F, w - r * 2.0F), 1.0F, Theme.alpha(accent & 0xFFFFFF, 110), 0.5F);
+    }
+
     public static void chromeGui(DrawContext g, float x, float y, float w, float h, float r) {
+        if (Theme.LIQUID) {
+            liquid(g, x, y, w, h, Theme.ACCENT, r);
+            return;
+        }
         int i = switch (Theme.CHROME) {
             case NEON -> Theme.alpha(Theme.NEON_BG, Math.round(255.0F * Theme.NAV_A));
             case MINIMAL -> Theme.alpha(Theme.MINIMAL_BG, Math.round(220.0F * Theme.NAV_A));
@@ -147,6 +167,10 @@ public final class Paint {
 
     /** Shared HUD plate: near-black translucent body, hairline outline, small radius. */
     public static void hudPlate(DrawContext g, float x, float y, float w, float h, int ac) {
+        if (Theme.LIQUID) {
+            liquid(g, x, y, w, h, ac, 8.0F);
+            return;
+        }
         box(g, x, y, w, h, Theme.alpha(0x0A0910, 222), 8.0F);
         outline(g, x, y, w, h, Theme.alpha(0xFFFFFF, 20), 8.0F);
     }
@@ -189,6 +213,10 @@ public final class Paint {
     }
 
     public static void glass(DrawContext g, float x, float y, float w, float h, float r, boolean shadow) {
+        if (Theme.LIQUID) {
+            liquid(g, x, y, w, h, Theme.ACCENT, r);
+            return;
+        }
         switch (Theme.CHROME) {
             case NEON:
                 box(g, x, y, w, h, Theme.NEON_BG, r);
@@ -239,6 +267,10 @@ public final class Paint {
     }
 
     public static void panelBody(DrawContext g, float x, float y, float w, float h) {
+        if (Theme.LIQUID) {
+            liquid(g, x, y, w, h, Theme.ACCENT, 9.0F);
+            return;
+        }
         switch (Theme.CHROME) {
             case NEON:
                 box(g, x, y, w, h, Theme.alpha(Theme.NEON_BG, 245), 9.0F);

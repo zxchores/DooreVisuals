@@ -394,6 +394,30 @@ public final class ConfigFeature extends Feature {
                     return true;
                 }
 
+                case "diff" -> {
+                    String[] names = rest.trim().split("\s+");
+                    if (names.length != 2 || names[0].isEmpty()) {
+                        chatUsage(mc, ".cfg diff <конфиг1> <конфиг2>");
+                        return true;
+                    }
+                    java.util.List<String> lines = dev.doorevisuals.data.ConfigDiff.compare(
+                        profiles.fileOf(cleanCommandName(names[0])), profiles.fileOf(cleanCommandName(names[1])));
+                    if (lines == null) {
+                        chatError(mc, "Не удалось прочитать один из конфигов");
+                    } else if (lines.isEmpty()) {
+                        chatInfo(mc, "Конфиги", "одинаковые");
+                    } else {
+                        chatInfo(mc, "Различий: " + lines.size(), names[0] + " → " + names[1]);
+                        for (int i = 0; i < Math.min(14, lines.size()); i++) {
+                            chatMuted(mc, lines.get(i));
+                        }
+                        if (lines.size() > 14) {
+                            chatMuted(mc, "… и ещё " + (lines.size() - 14));
+                        }
+                    }
+                    return true;
+                }
+
                 case "list" -> {
                     String query = rest.isBlank()
                         ? ""

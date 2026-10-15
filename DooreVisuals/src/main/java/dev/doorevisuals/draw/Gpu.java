@@ -16,6 +16,7 @@ public final class Gpu {
     private static final Identifier PLASMA = id("core/esp_plasma");
     private static final Identifier HAND_GLOW = id("core/hand_glow");
     private static final Identifier HAND_SURFACE = id("core/hand_surface");
+    private static final Identifier HAND_WAVE = id("core/hand_wave");
     private static final Identifier BLOCK_SHIMMER = id("core/block_shimmer");
     private static final Identifier HOLO = id("core/esp_holo");
     private static final Identifier SCAN = id("core/esp_scan");
@@ -43,8 +44,38 @@ public final class Gpu {
     public static final RenderPipeline HAND_SURFACE_NEON_PIPE = handSurface("neon", 1);
     public static final RenderPipeline HAND_SURFACE_PULSE_PIPE = handSurface("pulse", 2);
     public static final RenderPipeline HAND_SURFACE_OUTLINE_PIPE = handSurface("outline", 3);
+    public static final RenderPipeline HAND_WAVE_WAVES_PIPE = handWave("waves", 0);
+    public static final RenderPipeline HAND_WAVE_RIPPLES_PIPE = handWave("ripples", 1);
+    public static final RenderPipeline HAND_WAVE_PULSE_PIPE = handWave("pulse", 2);
+    public static final RenderPipeline HAND_WAVE_OUTLINE_PIPE = handWave("outline", 3);
+    public static final RenderPipeline HAND_WAVE_ITEM_WAVES_PIPE = handWave("item_waves", 0, true);
+    public static final RenderPipeline HAND_WAVE_ITEM_RIPPLES_PIPE = handWave("item_ripples", 1, true);
+    public static final RenderPipeline HAND_WAVE_ITEM_PULSE_PIPE = handWave("item_pulse", 2, true);
+    public static final RenderPipeline HAND_WAVE_ITEM_OUTLINE_PIPE = handWave("item_outline", 3, true);
 
     private Gpu() {
+    }
+
+    /**
+     * Compiles every pipeline of the client now, at start, instead of at the moment an effect is first drawn, which is where
+     * the first-use stutter came from. A pipeline that fails to compile is only logged here, so one bad shader cannot stop
+     * the others or the start.
+     */
+    public static void precompileAll() {
+        long started = System.nanoTime();
+        int done = 0;
+        for (java.lang.reflect.Field field : Gpu.class.getDeclaredFields()) {
+            if (RenderPipeline.class.isAssignableFrom(field.getType()) && java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                try {
+                    field.setAccessible(true);
+                    com.mojang.blaze3d.systems.RenderSystem.getDevice().precompilePipeline((RenderPipeline)field.get(null));
+                    done++;
+                } catch (Throwable error) {
+                    org.slf4j.LoggerFactory.getLogger("DooreVisuals/Gpu").warn("Pipeline {} did not precompile: {}", field.getName(), error.toString());
+                }
+            }
+        }
+        org.slf4j.LoggerFactory.getLogger("DooreVisuals/Gpu").info("Precompiled {} pipelines in {} ms", done, (System.nanoTime() - started) / 1_000_000L);
     }
 
     public static void warm() {
@@ -56,6 +87,11 @@ public final class Gpu {
         HAND_SURFACE_NEON_PIPE.getClass();
         HAND_SURFACE_PULSE_PIPE.getClass();
         HAND_SURFACE_OUTLINE_PIPE.getClass();
+        HAND_WAVE_WAVES_PIPE.getClass();
+        HAND_WAVE_RIPPLES_PIPE.getClass();
+        HAND_WAVE_PULSE_PIPE.getClass();
+        HAND_WAVE_OUTLINE_PIPE.getClass();
+        HAND_WAVE_ITEM_WAVES_PIPE.getClass();
         BLOCK_SHIMMER_PIPE.getClass();
         BLOCK_SHIMMER_LINES_PIPE.getClass();
         HOLO_PIPE.getClass();
@@ -136,12 +172,58 @@ public final class Gpu {
         );
     }
 
+    public static RenderPipeline handWavePipe(int style, boolean item) {
+        if (item) {
+            return switch (style) {
+                case 1 -> HAND_WAVE_ITEM_RIPPLES_PIPE;
+                case 2 -> HAND_WAVE_ITEM_PULSE_PIPE;
+                case 3 -> HAND_WAVE_ITEM_OUTLINE_PIPE;
+                default -> HAND_WAVE_ITEM_WAVES_PIPE;
+            };
+        }
+        return switch (style) {
+            case 1 -> HAND_WAVE_RIPPLES_PIPE;
+            case 2 -> HAND_WAVE_PULSE_PIPE;
+            case 3 -> HAND_WAVE_OUTLINE_PIPE;
+            default -> HAND_WAVE_WAVES_PIPE;
+        };
+    }
+
+    private static RenderPipeline handWave(String name, int style) {
+        return handWave(name, style, false);
+    }
+
+    /**
+     * The Hand Shader waves: the vertex format of the player model, which is also the format of item quads. The colour,
+     * opacity, speed and size ride in the vertex attributes, the wave phase comes from the game clock. For the item variant the
+     * colour travels in the light value (item quads have no tint of their own to carry it).
+     */
+    private static RenderPipeline handWave(String name, int style, boolean item) {
+        RenderPipeline.Builder builder = RenderPipeline.builder(new Snippet[]{RenderPipelines.POSITION_COLOR_SNIPPET, RenderPipelines.GLOBALS_SNIPPET})
+            .withLocation(id("pipeline/v3_hand_wave_" + name))
+            .withVertexShader(HAND_WAVE)
+            .withFragmentShader(HAND_WAVE)
+            .withShaderDefine("DOORE_WAVE_STYLE", style)
+            .withSampler("Sampler0")
+            .withBlend(BlendFunction.TRANSLUCENT)
+            // The same geometry as what was drawn first: a small bias towards the camera keeps the waves on top of it.
+            .withDepthBias(-1.0F, -10.0F)
+            .withDepthWrite(false)
+            .withCull(false)
+            .withVertexFormat(VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, DrawMode.QUADS);
+        if (item) {
+            builder = builder.withShaderDefine("DOORE_WAVE_ITEM", 1);
+        }
+        return RenderPipelines.register(builder.build());
+    }
+
     private static RenderPipeline sky() {
         return RenderPipelines.register(
             RenderPipeline.builder(new Snippet[]{RenderPipelines.POSITION_COLOR_SNIPPET, RenderPipelines.GLOBALS_SNIPPET})
                 .withLocation(id("pipeline/v3_sky"))
                 .withVertexShader(SKY)
                 .withFragmentShader(SKY)
+                .withSampler("Sampler0")
                 .withBlend(BlendFunction.TRANSLUCENT)
                 .withDepthWrite(false)
                 .withCull(false)

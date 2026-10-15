@@ -78,14 +78,24 @@ public final class KnifeAnim {
     private KnifeAnim() {
     }
 
+    /** The converted 3D models move like the knives of the same kind. */
+    private static String base(String model) {
+        return switch (model) {
+            case "Бабочка (3D)" -> "Бабочка";
+            case "М9 (3D)" -> "М9";
+            case "Стилет (3D)" -> "Штык-нож";
+            default -> model;
+        };
+    }
+
     /** True when the model has its own inspect routine. */
     public static boolean hasInspect(String model) {
-        return INSPECT.containsKey(model);
+        return INSPECT.containsKey(base(model));
     }
 
     /** Pose of the model's own inspect routine at linear progress t, 0..1. */
     public static float[] inspect(String model, float t) {
-        float[][] rows = INSPECT.get(model);
+        float[][] rows = INSPECT.get(base(model));
         return rows == null ? new float[6] : sample(rows, t);
     }
 
@@ -95,7 +105,7 @@ public final class KnifeAnim {
         return switch (style) {
             case "Переворот" -> new float[] {0.0F, 0.0F, 0.0F, 0.0F, -360.0F * t, 24.0F * wave};
             case "Восьмёрка" -> new float[] {0.0F, 0.0F, 0.0F, 120.0F * wave, 62.0F * (float)Math.sin(t * Math.PI * 2.0), -28.0F * wave};
-            default -> new float[] {0.0F, 0.0F, 0.0F, 350.0F * t, 18.0F * wave, -42.0F * wave};
+            default -> new float[] {0.0F, 0.0F, 0.0F, 360.0F * t, 18.0F * wave, -42.0F * wave};
         };
     }
 
@@ -106,7 +116,7 @@ public final class KnifeAnim {
     public static float[] draw(String model, float equipProgress) {
         float e = Math.max(0.0F, Math.min(1.0F, equipProgress));
         float s = e * e;
-        return switch (model) {
+        return switch (base(model)) {
             case "Бабочка" -> new float[] {0.0F, 0.0F, 0.0F, 0.0F, -360.0F * s, 10.0F * s};
             case "Карамбит" -> new float[] {0.0F, 0.0F, 0.0F, 0.0F, -20.0F * s, 540.0F * s};
             case "М9" -> new float[] {0.0F, 0.0F, 0.0F, 180.0F * s, -60.0F * s, -14.0F * s};
@@ -147,11 +157,21 @@ public final class KnifeAnim {
         float h11 = u3 - u2;
         float[] out = new float[6];
         for (int c = 1; c <= 6; c++) {
-            float m0 = tangent(rows, i, c);
-            float m1 = tangent(rows, i + 1, c);
+            // Monotone tangents: a segment never runs past its keys, so a spin does not overshoot and snap back at the end.
+            float delta = (rows[i + 1][c] - rows[i][c]) / h;
+            float m0 = limit(tangent(rows, i, c), delta);
+            float m1 = limit(tangent(rows, i + 1, c), delta);
             out[c - 1] = h00 * rows[i][c] + h10 * h * m0 + h01 * rows[i + 1][c] + h11 * h * m1;
         }
         return out;
+    }
+
+    private static float limit(float m, float delta) {
+        if (m * delta <= 0.0F) {
+            return 0.0F;
+        }
+        float cap = 3.0F * Math.abs(delta);
+        return Math.copySign(Math.min(Math.abs(m), cap), delta);
     }
 
     private static float tangent(float[][] rows, int k, int c) {

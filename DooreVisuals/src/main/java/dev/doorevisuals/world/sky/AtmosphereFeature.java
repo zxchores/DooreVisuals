@@ -67,6 +67,8 @@ public final class AtmosphereFeature extends Feature implements Tick {
     private final Opt.Num auroraStrength = this.opt(
         new Opt.Num("aurora_strength", "Сила авроры", 0.6, 0.1, 1.0, 0.05).visibleWhen(() -> (Boolean)this.aurora.get())
     );
+    private final Opt.Pick moonSkin = this.opt(new Opt.Pick("moon_skin", "Поверхность луны", "Кратеры", "Нет", "Кратеры", "Файл").chips());
+    private final Opt.Text moonFilePath = this.opt(new Opt.Text("moon_file", "Картинка луны (путь к PNG, из буфера)", "").visibleWhen(() -> "Файл".equals(this.moonSkin.get())));
     private final Opt.Flag ownCelestial = this.opt(new Opt.Flag("own_celestial", "Свои светила", true));
     private final Opt.Pick meteors = this.opt(new Opt.Pick("meteors", "Падающие звёзды", "Редко", "Нет", "Редко", "Часто"));
     private final Opt.Flag weatherFx = this.opt(new Opt.Flag("rain_fx", "Вспышки грозы", true));
@@ -255,6 +257,15 @@ public final class AtmosphereFeature extends Feature implements Tick {
     /**
      * Доля лунного цикла: 0 — полная луна, 0.5 — новолуние (ванильный счёт фаз).
      */
+    /** The surface of the moon: "Нет" (the shader's own), "Кратеры" or "Файл". */
+    public static String moonSkin() {
+        return dev.doorevisuals.App.features().find(AtmosphereFeature.class).map(f -> f.moonSkin.get()).orElse("Нет");
+    }
+
+    public static String moonFile() {
+        return dev.doorevisuals.App.features().find(AtmosphereFeature.class).map(f -> f.moonFilePath.get()).orElse("");
+    }
+
     private static float moonPhase(MinecraftClient mc) {
         World world = mc.world;
         if (world == null) {

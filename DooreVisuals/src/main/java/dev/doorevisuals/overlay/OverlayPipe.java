@@ -29,6 +29,7 @@ public final class OverlayPipe {
     public static void draw(DrawContext g, RenderTickCounter dt) {
         MinecraftClient minecraftclient = MinecraftClient.getInstance();
         ContainerChrome.reset();
+        dev.doorevisuals.draw.Theme.tickFrame();
         if (minecraftclient.player != null && !minecraftclient.options.hudHidden && App.live()) {
             if (!shouldHideHud(minecraftclient)) {
                 try {
@@ -37,11 +38,13 @@ public final class OverlayPipe {
                         run(HudFeature.class, "HUD", hud -> hud.paint(g, dt));
                         run(DamageIndicatorFeature.class, "индикатор урона", fx -> fx.paint(g));
                         run(CrosshairFeature.class, "прицел", c -> c.paint(g));
+                        dev.doorevisuals.tools.ContainerPeekFeature.paint(g);
                         run(GpsFeature.class, "HUD GPS", gps -> gps.paintHud(g));
                         run(TargetEspFeature.class, "HUD Target ESP", esp -> esp.paintHud(g));
                         run(HotbarFeature.class, "панель быстрого доступа", hb -> hb.paintNvg(g));
                     });
                     run(HudFeature.class, "иконки HUD", hud -> hud.paintItems(g));
+                    dev.doorevisuals.tools.ContainerPeekFeature.paintItems(g);
                     run(HotbarFeature.class, "иконки хотбара", hb -> hb.paintItems(g));
                     run(CooldownsFeature.class, "перезарядка хотбара", c -> c.paintHotbar(g));
                 } catch (Throwable throwable) {

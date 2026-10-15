@@ -28,16 +28,37 @@ public final class SwordFeature extends Feature implements Tick {
     private static final String OWN_STYLE = "Как у ножа";
     /** Shape names in the order the pickers list them (saved choices refer to the names). */
     private static final List<String> NAMES = List.of(
-            "Арканум", "Пламенный", "Демонический", "Карамбит", "Бабочка", "Штык-нож", "Охотничий", "М9");
-    private static final Map<String, Identifier> MODEL_IDS = Map.of(
-            "Арканум", Identifier.of("doorevisuals", "arcanum"),
-            "Пламенный", Identifier.of("doorevisuals", "flame"),
-            "Демонический", Identifier.of("doorevisuals", "demon"),
-            "Карамбит", Identifier.of("doorevisuals", "karambit"),
-            "Бабочка", Identifier.of("doorevisuals", "butterfly"),
-            "Штык-нож", Identifier.of("doorevisuals", "bayonet"),
-            "Охотничий", Identifier.of("doorevisuals", "hunter"),
-            "М9", Identifier.of("doorevisuals", "m9"));
+            "Арканум", "Пламенный", "Демонический", "Карамбит", "Бабочка", "Штык-нож", "Охотничий", "М9",
+            "Бабочка (3D)", "М9 (3D)", "Стилет (3D)");
+    private static final Map<String, Identifier> MODEL_IDS = Map.ofEntries(
+            Map.entry("Арканум", Identifier.of("doorevisuals", "arcanum")),
+            Map.entry("Пламенный", Identifier.of("doorevisuals", "flame")),
+            Map.entry("Демонический", Identifier.of("doorevisuals", "demon")),
+            Map.entry("Карамбит", Identifier.of("doorevisuals", "karambit")),
+            Map.entry("Бабочка", Identifier.of("doorevisuals", "butterfly")),
+            Map.entry("Штык-нож", Identifier.of("doorevisuals", "bayonet")),
+            Map.entry("Охотничий", Identifier.of("doorevisuals", "hunter")),
+            Map.entry("М9", Identifier.of("doorevisuals", "m9")),
+            // Converted from Sketchfab models (CC BY 4.0), see CREDITS-knives.txt
+            Map.entry("Бабочка (3D)", Identifier.of("doorevisuals", "sk_butterfly")),
+            Map.entry("М9 (3D)", Identifier.of("doorevisuals", "sk_m9")),
+            Map.entry("Стилет (3D)", Identifier.of("doorevisuals", "sk_stiletto")));
+
+    /** How many knife models there are to preview. */
+    public static int previewCount() {
+        return NAMES.size();
+    }
+
+    public static String previewName(int index) {
+        return NAMES.get(Math.floorMod(index, NAMES.size()));
+    }
+
+    /** A sword with the model of the knife at that index, for drawing in a menu. */
+    public static ItemStack previewStack(int index) {
+        ItemStack stack = new ItemStack(net.minecraft.item.Items.NETHERITE_SWORD);
+        stack.set(DataComponentTypes.ITEM_MODEL, MODEL_IDS.get(previewName(index)));
+        return stack;
+    }
 
     private static volatile boolean live;
     private static volatile boolean drawOn = true;
@@ -68,7 +89,7 @@ public final class SwordFeature extends Feature implements Tick {
                 Category.COSMETICS,
                 true
         );
-        this.badge(Badge.NEW);
+        this.badge(Badge.BETA);
         // Every material has a knife from the start, so the module works as soon as it is enabled.
         this.pick("wooden", "Деревянный", "Охотничий");
         this.pick("stone", "Каменный", "Штык-нож");
@@ -269,9 +290,25 @@ public final class SwordFeature extends Feature implements Tick {
                 add(pose, KnifeAnim.generic(inspectStyle, raw * raw * (3.0F - 2.0F * raw)));
             }
         } else if (idleOn) {
-            add(pose, KnifeAnim.idle(System.currentTimeMillis() / 1000.0F));
+            float[] sway = KnifeAnim.idle(System.currentTimeMillis() / 1000.0F);
+            // The sway returns gradually after an inspect instead of jumping in on the last frame.
+            float k = settle(shape);
+            for (int i = 0; i < 6; i++) {
+                sway[i] *= k;
+            }
+            add(pose, sway);
         }
         return pose;
+    }
+
+    /** 0 right after an inspect ends and 1 once the hand has settled (smoothstep over 0.8 s). */
+    private static float settle(String shape) {
+        if (inspectStartedAt <= 0L) {
+            return 1.0F;
+        }
+        float since = System.currentTimeMillis() - inspectStartedAt - inspectDuration(shape) * 1000.0F;
+        float x = Math.max(0.0F, Math.min(1.0F, since / 800.0F));
+        return x * x * (3.0F - 2.0F * x);
     }
 
     private static void add(float[] into, float[] more) {

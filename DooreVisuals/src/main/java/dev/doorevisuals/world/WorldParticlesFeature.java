@@ -49,6 +49,7 @@ public final class WorldParticlesFeature extends Feature implements Tick {
     private final Opt.Tint color = this.opt(new Opt.Tint("color", "\u0426\u0432\u0435\u0442", -12533600).visibleWhen(() -> !(Boolean)this.themeColor.get()));
     private final List<WorldParticlesFeature.W> free = new ArrayList<>();
     private long born = System.currentTimeMillis();
+    private long lastDrawAt;
     private String lastSelection = "";
 
     public WorldParticlesFeature() {
@@ -91,14 +92,10 @@ public final class WorldParticlesFeature extends Feature implements Tick {
                     worldparticlesfeature$w.z = vec3d.z + (threadlocalrandom.nextDouble() - 0.5) * d0 * 2.0;
                     worldparticlesfeature$w.size = this.size.f() * (0.7F + threadlocalrandom.nextFloat() * 0.6F);
                     worldparticlesfeature$w.phase = threadlocalrandom.nextFloat() * 6.2F;
-                    worldparticlesfeature$w.color = this.themeColor.get() ? ThemeFeature.effectTint() : (Integer)this.color.get();
                     worldparticlesfeature$w.style = extras.isEmpty() ? (String)this.style.get() : extras.get(threadlocalrandom.nextInt(extras.size()));
-                    worldparticlesfeature$w.vx = (threadlocalrandom.nextFloat() - 0.5F) * 0.04F * this.speed.f();
-                    worldparticlesfeature$w.vy = (
-                            !"\u0421\u043d\u0435\u0433".equals(this.style.get()) && !"\u041f\u0435\u043f\u0435\u043b".equals(this.style.get()) ? 0.01F : -0.03F
-                        )
-                        * this.speed.f();
-                    worldparticlesfeature$w.vz = (threadlocalrandom.nextFloat() - 0.5F) * 0.04F * this.speed.f();
+                    worldparticlesfeature$w.vx = (threadlocalrandom.nextFloat() - 0.5F) * 0.04F;
+                    worldparticlesfeature$w.vy = !"\u0421\u043d\u0435\u0433".equals(this.style.get()) && !"\u041f\u0435\u043f\u0435\u043b".equals(this.style.get()) ? 0.01F : -0.03F;
+                    worldparticlesfeature$w.vz = (threadlocalrandom.nextFloat() - 0.5F) * 0.04F;
                     this.free.add(worldparticlesfeature$w);
                 }
 
@@ -107,9 +104,6 @@ public final class WorldParticlesFeature extends Feature implements Tick {
                 }
 
                 for (WorldParticlesFeature.W worldparticlesfeature$w1 : this.free) {
-                    worldparticlesfeature$w1.x = worldparticlesfeature$w1.x + worldparticlesfeature$w1.vx;
-                    worldparticlesfeature$w1.y = worldparticlesfeature$w1.y + worldparticlesfeature$w1.vy;
-                    worldparticlesfeature$w1.z = worldparticlesfeature$w1.z + worldparticlesfeature$w1.vz;
                     if (worldparticlesfeature$w1.x < vec3d.x - d0
                         || worldparticlesfeature$w1.x > vec3d.x + d0
                         || worldparticlesfeature$w1.z < vec3d.z - d0
@@ -141,6 +135,17 @@ public final class WorldParticlesFeature extends Feature implements Tick {
     private void drawFree(WorldRenderContext ctx) {
         if (!this.free.isEmpty()) {
             long i = System.currentTimeMillis();
+            // Frame-based motion: one game tick is 1/20 s, so the particles move smoothly at any frame rate.
+            float step = this.lastDrawAt == 0L ? 0.0F : Math.max(0.0F, Math.min(0.1F, (i - this.lastDrawAt) / 1000.0F)) * 20.0F;
+            this.lastDrawAt = i;
+            float spd = this.speed.f();
+            int tint = this.themeColor.get() ? ThemeFeature.effectTint() : (Integer)this.color.get();
+            for (WorldParticlesFeature.W moving : this.free) {
+                moving.x += moving.vx * spd * step;
+                moving.y += moving.vy * spd * step;
+                moving.z += moving.vz * spd * step;
+                moving.color = tint;
+            }
             for (WorldParticlesFeature.W worldparticlesfeature$w : this.free) {
                 if (!dev.doorevisuals.draw.VisualQuality.takeParticle()) break;
                 String s = worldparticlesfeature$w.style == null ? (String)this.style.get() : worldparticlesfeature$w.style;
@@ -203,11 +208,14 @@ public final class WorldParticlesFeature extends Feature implements Tick {
                     Mesh.box(ctx, new net.minecraft.util.math.Box(worldparticlesfeature$w.x-a*0.35, worldparticlesfeature$w.y-a, worldparticlesfeature$w.z-a*0.35,
                         worldparticlesfeature$w.x+a*0.35, worldparticlesfeature$w.y+a, worldparticlesfeature$w.z+a*0.35), 0, Mesh.alpha(worldparticlesfeature$w.color, f));
                 } else if ("\u0421\u0435\u0440\u0434\u0446\u0430".equals(s)) {
-                    float a = worldparticlesfeature$w.size * 0.45F;
-                    int c = Mesh.alpha(worldparticlesfeature$w.color, f);
-                    Mesh.orb(ctx, worldparticlesfeature$w.x-a*0.35, worldparticlesfeature$w.y+a*0.2, worldparticlesfeature$w.z, a*0.55F, c);
-                    Mesh.orb(ctx, worldparticlesfeature$w.x+a*0.35, worldparticlesfeature$w.y+a*0.2, worldparticlesfeature$w.z, a*0.55F, c);
-                    Mesh.cone(ctx, worldparticlesfeature$w.x, worldparticlesfeature$w.y-a*0.45, worldparticlesfeature$w.z, a*0.65, 0.01, a*1.1F, 12, c, dev.doorevisuals.draw.Types.glow());
+                    // A camera-facing sprite with a soft glow, bobbing and pulsing like a beating heart.
+                    float pulse = 1.0F + 0.12F * (float)Math.sin(i * 0.006 + worldparticlesfeature$w.phase * 2.0F);
+                    float h = worldparticlesfeature$w.size * 1.5F * pulse;
+                    double bob = Math.sin(i * 0.002 + worldparticlesfeature$w.phase) * 0.06;
+                    Mesh.orb(ctx, worldparticlesfeature$w.x, worldparticlesfeature$w.y + bob, worldparticlesfeature$w.z, h * 0.95F,
+                        Mesh.alpha(worldparticlesfeature$w.color, f * 0.22F));
+                    Mesh.billboard(ctx, dev.doorevisuals.draw.Sprites.HEART_SOFT, worldparticlesfeature$w.x, worldparticlesfeature$w.y + bob,
+                        worldparticlesfeature$w.z, h, h, Mesh.alpha(worldparticlesfeature$w.color, 0.55F + 0.45F * f));
                 } else if ("\u041f\u0438\u043a\u0441\u0435\u043b\u044c\u043d\u0430\u044f \u0448\u0443\u0442\u043a\u0430".equals(s)) {
                     float p = worldparticlesfeature$w.size * 0.28F;
                     int c = Mesh.alpha(worldparticlesfeature$w.color, f * 0.85F);

@@ -2,6 +2,14 @@ package dev.doorevisuals.draw;
 
 public final class Theme {
     public static volatile Theme.Chrome CHROME = Theme.Chrome.GLASS;
+    /** Liquid Glass: every glass panel and HUD plate is painted as translucent liquid glass (see LiquidGlassFeature). */
+    public static volatile boolean LIQUID;
+    /** How glassy it is, 0.3 (more body) .. 1.0 (almost clear). */
+    public static volatile float LIQUID_A = 0.6F;
+    /** Colour changes glide to the new theme instead of snapping, once the client has started. */
+    private static volatile boolean animate;
+    private static final long BORN = System.nanoTime();
+    private static long lastFrameNanos;
     public static final float R = 12.0F;
     public static volatile float PANEL_A = 0.94F;
     public static volatile float CARD_A = 0.88F;
@@ -41,6 +49,17 @@ public final class Theme {
     private Theme() {
     }
 
+    /** Once per rendered frame: advances the theme glide with real time. */
+    public static void tickFrame() {
+        long now = System.nanoTime();
+        float dt = lastFrameNanos == 0L ? 0.0F : Math.min(0.1F, (now - lastFrameNanos) / 1.0E9F);
+        lastFrameNanos = now;
+        if (!animate && now - BORN > 4_000_000_000L) {
+            animate = true;
+        }
+        tickTransition(dt);
+    }
+
     public static void tickTransition(float dt) {
         if (!(dt <= 0.0F)) {
             float f = (float)(1.0 - Math.pow(0.001F, dt * 6.0F));
@@ -71,6 +90,9 @@ public final class Theme {
         targetAccentDeep = deep;
         targetHud = accent | 0xFF000000;
         targetEffect = accent | 0xFF000000;
+        if (animate) {
+            return;
+        }
         ACCENT = accent;
         ACCENT_HOT = hot;
         ACCENT_DIM = dim;
@@ -98,6 +120,9 @@ public final class Theme {
         targetAccentDeep = j1;
         targetHud = k;
         targetEffect = l;
+        if (animate) {
+            return;
+        }
         ACCENT = i;
         ACCENT_HOT = j;
         HUD = k;

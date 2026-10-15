@@ -25,6 +25,7 @@ public abstract class GameFrameMixin {
             boolean tick,
             CallbackInfo ci
     ) {
+        dev.doorevisuals.tools.ClipsFeature.frame();
         if (PostFxFeature.active()) {
             PostFx.frame();
         }

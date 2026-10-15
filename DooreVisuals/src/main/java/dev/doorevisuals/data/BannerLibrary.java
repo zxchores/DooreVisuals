@@ -15,15 +15,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 public final class BannerLibrary {
+    /** The only built-in banner is a still picture with the client logo; own pictures, GIFs and videos are added next to it. */
     private static final String[][] BUILTIN_GIFS = new String[][]{
-        {"aurora", "Aurora", "assets/doorevisuals/textures/gui/gif/aurora.gif"},
-        {"pulse", "Pulse", "assets/doorevisuals/textures/gui/gif/pulse.gif"},
-        {"sweep", "Sweep", "assets/doorevisuals/textures/gui/gif/sweep.gif"},
-        {"mesh", "Mesh", "assets/doorevisuals/textures/gui/gif/mesh.gif"}
+        {"logo", "DooreVisuals", "assets/doorevisuals/textures/gui/banner_logo.png"}
     };
     private static final List<BannerLibrary.Entry> ENTRIES = new CopyOnWriteArrayList<>();
     private static final List<List<Image>> LOADED = new ArrayList<>();
-    private static String selected = "builtin:aurora";
+    private static String selected = "builtin:logo";
     private static boolean dirty = true;
 
     private BannerLibrary() {
@@ -171,7 +169,7 @@ public final class BannerLibrary {
         } else {
             int i = indexOf(selected);
             if (i < 0) {
-                i = indexOf("builtin:aurora");
+                i = indexOf("builtin:logo");
             }
 
             if (i < 0) {
@@ -276,14 +274,8 @@ public final class BannerLibrary {
             if (indexOf(selected) < 0) {
                 String s = selected;
 
-                selected = switch (s) {
-                    case "builtin:0" -> "builtin:aurora";
-                    case "builtin:1" -> "builtin:pulse";
-                    case "builtin:2" -> "builtin:sweep";
-                    case "builtin:3" -> "builtin:mesh";
-                    case "builtin:cycle" -> "builtin:cycle";
-                    default -> "builtin:aurora";
-                };
+                // The former animated banners (aurora, pulse, sweep, mesh, numbered ones) are replaced by the logo.
+                selected = "builtin:cycle".equals(s) ? s : "builtin:logo";
             }
         }
     }
@@ -291,37 +283,13 @@ public final class BannerLibrary {
     private static void ensureBuiltins() {
         for (String[] astring : BUILTIN_GIFS) {
             Path path = cacheDir(astring[0]);
-            if (listPngFrames(path).isEmpty()) {
-                boolean flag = extractClasspath(astring[2], path);
-                if (!flag || listPngFrames(path).isEmpty()) {
-                    BannerBake.write(astring[0], path.resolveSibling(astring[0] + ".gif"), path);
+            try (InputStream in = BannerLibrary.class.getClassLoader().getResourceAsStream(astring[2])) {
+                if (in != null) {
+                    // Rewritten on every start, so a changed picture in an update replaces the cached one.
+                    Files.copy(in, path.resolve("frame_0000.png"), StandardCopyOption.REPLACE_EXISTING);
                 }
+            } catch (Exception exception) {
             }
-        }
-    }
-
-    private static boolean extractClasspath(String resource, Path frames) {
-        try {
-            boolean flag;
-            try (InputStream inputstream = BannerLibrary.class.getClassLoader().getResourceAsStream(resource)) {
-                if (inputstream == null) {
-                    return false;
-                }
-
-                Path path = Files.createTempFile("doore-banner-", ".gif");
-
-                try {
-                    Files.copy(inputstream, path, StandardCopyOption.REPLACE_EXISTING);
-                    GifIO.explode(path, frames);
-                    flag = true;
-                } finally {
-                    Files.deleteIfExists(path);
-                }
-            }
-
-            return flag;
-        } catch (Exception exception) {
-            return false;
         }
     }
 

@@ -88,7 +88,9 @@ public final class JumpCirclesFeature extends Feature implements Tick {
     }
 
     private void pulse(AbstractClientPlayerEntity p, boolean onGround, boolean wasGround, long now, float ttl) {
-        if (wasGround && !onGround && p.getVelocity().y > 0.03) {
+        // The client does not track the velocity of other players, so their rise is read from the position change.
+        double rise = Math.max(p.getVelocity().y, p.getY() - p.lastY);
+        if (wasGround && !onGround && rise > 0.03) {
             this.rings.add(new JumpCirclesFeature.Ring(p.getX(), p.getY(), p.getZ(), now, ttl, p.getWidth() * 0.55));
         }
     }
