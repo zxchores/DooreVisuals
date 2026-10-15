@@ -1,0 +1,32 @@
+[Version]
+Class=IEXPRESS
+SEDVersion=3
+[Options]
+PackagePurpose=InstallApp
+ShowInstallProgramWindow=0
+HideExtractAnimation=1
+UseLongFileName=1
+InsideCompressed=0
+CAB_FixedSize=0
+CAB_ResvCodeSigning=0
+RebootMode=N
+InstallPrompt=
+DisplayLicense=
+FinishMessage=
+TargetName=C:\Users\xores\Desktop\Doorevisuals\DooreVisuals\dist\DooreVisuals-Loader.exe
+FriendlyName=DooreVisuals Loader
+AppLaunched=cmd /c Install-DooreVisuals.cmd
+PostInstallCmd=<None>
+AdminQuietInstCmd=
+UserQuietInstCmd=
+SourceFiles=SourceFiles
+[SourceFiles]
+SourceFiles0=C:\Users\xores\Desktop\Doorevisuals\DooreVisuals\dist\DooreVisuals-Install-1.3.0\
+[SourceFiles0]
+%FILE0%=
+%FILE1%=
+%FILE2%=
+[Strings]
+FILE0="Install-DooreVisuals.cmd"
+FILE1="Install-DooreVisuals.ps1"
+FILE2="doorevisuals-1.3.0.jar"

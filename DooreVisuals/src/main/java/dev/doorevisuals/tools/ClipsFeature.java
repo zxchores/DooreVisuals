@@ -137,6 +137,12 @@ public final class ClipsFeature extends Feature implements Tick {
             case HIGH -> 2;
             default -> 3;
         };
+        // The game only scales a frame down by a factor that divides both sides of it; the nearest smaller one is used otherwise.
+        int fw = mc.getFramebuffer().textureWidth;
+        int fh = mc.getFramebuffer().textureHeight;
+        while (factor > 1 && (fw % factor != 0 || fh % factor != 0)) {
+            factor--;
+        }
         int max = Math.max(1, Math.round(this.seconds.f() * this.fps.f()));
         try {
             ScreenshotRecorder.takeScreenshot(mc.getFramebuffer(), factor, image -> {

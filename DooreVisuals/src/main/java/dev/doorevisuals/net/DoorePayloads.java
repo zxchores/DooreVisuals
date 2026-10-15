@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 public final class DoorePayloads {
     public static final Identifier HANDSHAKE_ID = Identifier.of("doorevisuals", "handshake");
     public static final Identifier COSMETICS_ID = Identifier.of("doorevisuals", "cosmetics");
+    public static final Identifier EMOTE_ID = Identifier.of("doorevisuals", "emote");
 
     private DoorePayloads() {
     }
@@ -23,6 +24,22 @@ public final class DoorePayloads {
             buf.writeString(p.hatId == null ? "" : p.hatId, 32);
             buf.writeString(p.accessoryId == null ? "" : p.accessoryId, 32);
         }, buf -> new DoorePayloads.CosmeticsPayload(buf.readUuid(), buf.readString(32), buf.readString(32), buf.readString(32), buf.readString(32)));
+
+        public Id<? extends CustomPayload> getId() {
+            return TYPE;
+        }
+    }
+
+    /** An emote began (index 0 or more) or ended (negative) for the player; the server relays it to the others. */
+    public record EmotePayload(UUID playerId, int index) implements CustomPayload {
+        public static final Id<DoorePayloads.EmotePayload> TYPE = new Id(DoorePayloads.EMOTE_ID);
+        public static final PacketCodec<RegistryByteBuf, DoorePayloads.EmotePayload> CODEC = PacketCodec.ofStatic(
+            (buf, p) -> {
+                buf.writeUuid(p.playerId);
+                buf.writeVarInt(p.index);
+            },
+            buf -> new DoorePayloads.EmotePayload(buf.readUuid(), buf.readVarInt())
+        );
 
         public Id<? extends CustomPayload> getId() {
             return TYPE;

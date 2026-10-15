@@ -18,6 +18,11 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.kotlin_mod_version}"
 
+    // Fabric API and the Kotlin adapter travel inside the jar (jar-in-jar), so Fabric Loader is the only thing to install;
+    // a copy in the mods folder, if there is one, is used instead of the nested one.
+    include "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    include "net.fabricmc:fabric-language-kotlin:${project.kotlin_mod_version}"
+
     include implementation('org.lwjgl:lwjgl-nanovg:3.3.3')
     include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-linux')
     include implementation('org.lwjgl:lwjgl-nanovg:3.3.3:natives-windows')

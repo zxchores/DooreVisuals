@@ -1,6 +1,7 @@
 package dev.doorevisuals.net;
 
 import dev.doorevisuals.cosmetics.CosmeticsRegistry;
+import dev.doorevisuals.cosmetics.EmotesFeature;
 import java.util.UUID;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -36,6 +37,12 @@ public final class CosmeticsNet {
                 (payload, ctx) -> ctx.client()
                     .execute(() -> CosmeticsRegistry.setLook(payload.playerId(), payload.capeId(), payload.wingsId(), payload.hatId(), payload.accessoryId()))
             );
+            PayloadTypeRegistry.playC2S().register(DoorePayloads.EmotePayload.TYPE, DoorePayloads.EmotePayload.CODEC);
+            PayloadTypeRegistry.playS2C().register(DoorePayloads.EmotePayload.TYPE, DoorePayloads.EmotePayload.CODEC);
+            ClientPlayNetworking.registerGlobalReceiver(
+                DoorePayloads.EmotePayload.TYPE,
+                (payload, ctx) -> ctx.client().execute(() -> EmotesFeature.received(payload.playerId(), payload.index()))
+            );
             ClientPlayConnectionEvents.JOIN.register((Join)(handler, sender, client) -> client.execute(() -> {
                 MinecraftClient minecraftclient = MinecraftClient.getInstance();
                 if (minecraftclient.player != null) {
@@ -48,7 +55,10 @@ public final class CosmeticsNet {
                     CosmeticsCloud.fetch(uuid);
                 }
             }));
-            ClientPlayConnectionEvents.DISCONNECT.register((Disconnect)(handler, client) -> CosmeticsRegistry.clear());
+            ClientPlayConnectionEvents.DISCONNECT.register((Disconnect)(handler, client) -> {
+                CosmeticsRegistry.clear();
+                EmotesFeature.forgetRemote();
+            });
         }
     }
 
@@ -60,6 +70,13 @@ public final class CosmeticsNet {
             }
 
             CosmeticsCloud.push(id, capeId, wingsId);
+        }
+    }
+
+    /** Tells the other players (through a server with the relay) which emote this player plays; negative: it ended. */
+    public static void sendEmote(UUID id, int index) {
+        if (id != null && ClientPlayNetworking.canSend(DoorePayloads.EmotePayload.TYPE)) {
+            ClientPlayNetworking.send(new DoorePayloads.EmotePayload(id, index));
         }
     }
 

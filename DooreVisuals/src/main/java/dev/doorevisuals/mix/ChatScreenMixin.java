@@ -41,6 +41,7 @@ public abstract class ChatScreenMixin {
 
     private int doore$cfgSuggestionIndex = 0;
     private String doore$cfgLastText = "";
+    private boolean doore$cfgGhost = false;
 
     private static final String[] CFG_COMMANDS = {
         ".cfg load <имя>",
@@ -51,13 +52,6 @@ public abstract class ChatScreenMixin {
         ".cfg save [имя]",
         ".cfg help"
     };
-
-    private static final int LAVENDER = 0xFFC9B8;
-    private static final int LAVENDER_BRIGHT = 0xFFE7DF;
-    private static final int LAVENDER_DIM = 0xFF9B8AC9;
-    private static final int PANEL = 0xE50E0B14;
-    private static final int PANEL_2 = 0xF0130E1A;
-    private static final int BORDER = 0xA66E5CA3;
 
     @Inject(method = "render", at = @At("TAIL"))
     private void doore$renderCfgSuggestions(
@@ -72,6 +66,10 @@ public abstract class ChatScreenMixin {
         if (!text.toLowerCase(Locale.ROOT).startsWith(".cfg")) {
             this.doore$cfgSuggestionIndex = 0;
             this.doore$cfgLastText = text;
+            if (this.doore$cfgGhost) {
+                this.doore$cfgGhost = false;
+                this.chatField.setSuggestion(null);
+            }
             return;
         }
 
@@ -84,103 +82,39 @@ public abstract class ChatScreenMixin {
         if (suggestions.isEmpty()) {
             return;
         }
+        this.doore$cfgSuggestionIndex = Math.min(this.doore$cfgSuggestionIndex, suggestions.size() - 1);
+        // The rest of the chosen command is shown in the field in grey, like the game's own completion.
+        String chosen = suggestions.get(this.doore$cfgSuggestionIndex);
+        this.chatField.setSuggestion(chosen.regionMatches(true, 0, text, 0, text.length()) ? chosen.substring(text.length()) : null);
+        this.doore$cfgGhost = true;
 
-        int maxWidth = 0;
+        // The suggestions look like the game's own: a black translucent list above the field, the chosen one in yellow,
+        // the rest in grey, the first match on top. No title, no frame, no accent colours.
+        int rowHeight = 12;
+        int width = 0;
         for (String s : suggestions) {
-            maxWidth = Math.max(
-                maxWidth,
-                this.doore$text().getWidth(s) + 22
-            );
+            width = Math.max(width, this.doore$text().getWidth(s));
         }
-
-        int width = Math.min(
-            Math.max(190, maxWidth),
-            Math.min(420, this.doore$width() - 24)
-        );
-
-        int rowHeight = 16;
-        int height = suggestions.size() * rowHeight + 10;
-
-        int x = Math.max(
-            12,
-            Math.min(
-                this.chatField.getX(),
-                this.doore$width() - width - 12
-            )
-        );
-
-        int y = this.chatField.getY() - height - 6;
-        if (y < 10) {
-            y = this.chatField.getY() + this.chatField.getHeight() + 6;
+        width += 2;
+        int rows = Math.min(suggestions.size(), 10);
+        int height = rows * rowHeight;
+        int x = Math.max(0, Math.min(this.chatField.getCharacterX(0) - 1, this.doore$width() - width));
+        int y = this.chatField.getY() - 3 - height;
+        if (y < 0) {
+            y = this.chatField.getY() + this.chatField.getHeight() + 3;
         }
-
-        context.fill(
-            x - 1,
-            y - 1,
-            x + width + 1,
-            y + height + 1,
-            BORDER
-        );
-
-        context.fill(
-            x,
-            y,
-            x + width,
-            y + height,
-            PANEL
-        );
-
-        context.fill(
-            x + 1,
-            y + 1,
-            x + 3,
-            y + height - 1,
-            LAVENDER
-        );
-
-        context.drawTextWithShadow(
-            this.doore$text(),
-            "DOORE",
-            x + 10,
-            y + 5,
-            LAVENDER_BRIGHT
-        );
-
-        context.drawTextWithShadow(
-            this.doore$text(),
-            "CONFIG",
-            x + 47,
-            y + 5,
-            LAVENDER_DIM
-        );
-
-        int listY = y + 18;
-
-        for (int i = 0; i < suggestions.size(); i++) {
-            boolean selected =
-                i == this.doore$cfgSuggestionIndex;
-
-            if (selected) {
-                context.fill(
-                    x + 5,
-                    listY - 1,
-                    x + width - 5,
-                    listY + rowHeight - 2,
-                    PANEL_2
-                );
-            }
-
+        int first = Math.max(0, Math.min(this.doore$cfgSuggestionIndex - rows / 2, suggestions.size() - rows));
+        context.fill(x, y, x + width, y + height, 0xD0000000);
+        for (int i = 0; i < rows; i++) {
+            int index = first + i;
+            int rowY = y + i * rowHeight;
             context.drawTextWithShadow(
                 this.doore$text(),
-                suggestions.get(i),
-                x + 10,
-                listY + 1,
-                selected
-                    ? LAVENDER_BRIGHT
-                    : LAVENDER_DIM
+                suggestions.get(index),
+                x + 1,
+                rowY + 2,
+                index == this.doore$cfgSuggestionIndex ? 0xFFFFFF00 : 0xFFAAAAAA
             );
-
-            listY += rowHeight;
         }
     }
 
